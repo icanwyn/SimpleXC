@@ -401,19 +401,39 @@
   }
   .timer-unit { font-size: 11px; color: var(--text4); letter-spacing: 2px; }
  
-  .timer-controls { display: flex; gap: 10px; width: 100%; }
+  .timer-controls { display: flex; gap: 12px; width: 100%; align-items: stretch; }
   .btn-ctrl {
-    flex: 1; height: 44px; border: none; border-radius: var(--radius);
-    font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    flex: 1; height: 72px; border: none; border-radius: var(--radius2);
+    font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer;
     transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
   .btn-ctrl:active { transform: scale(0.96); }
-  .btn-start { background: var(--green); color: #fff; }
+  
+  .btn-start { 
+    background: var(--green); 
+    color: #fff; 
+    font-size: 20px;
+    height: 120px;
+    box-shadow: 0 6px 20px rgba(52,199,89,0.4);
+  }
   .btn-start:hover { background: #2db54a; }
-  .btn-pause { background: rgba(255,149,0,0.12); color: var(--orange); border: 0.5px solid rgba(255,149,0,0.25); }
-  .btn-pause:hover { background: rgba(255,149,0,0.18); }
-  .btn-reset { flex: 0 0 44px; background: rgba(60,60,67,0.08); color: var(--text2); }
+  
+  .btn-pause { 
+    background: rgba(255,149,0,0.15); 
+    color: var(--orange); 
+    border: 1px solid rgba(255,149,0,0.3);
+    font-size: 17px;
+  }
+  .btn-pause:hover { background: rgba(255,149,0,0.25); }
+  
+  .btn-reset { 
+    flex: 0 0 72px; 
+    height: 72px;
+    background: rgba(60,60,67,0.08); 
+    color: var(--text2); 
+  }
   .btn-reset:hover { background: rgba(60,60,67,0.14); }
  
   /* TAP BUTTON */
@@ -700,11 +720,11 @@
       </button>
       <button class="btn-ghost" onclick="saveProject()">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 1v9M4 7l4 4 4-4M2 13h12"/></svg>
-        Save Project
+        Save to File (other device)
       </button>
       <button class="btn-ghost" onclick="document.getElementById('project-upload').click()">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 12V3M4 7l4-4 4 4M2 13h12"/></svg>
-        Load Project
+        Load from File
       </button>
       <input type="file" id="project-upload" accept=".json" style="display:none" onchange="loadProject(event)">
       <button class="btn-primary btn-green" onclick="showAddModal()">
@@ -1528,16 +1548,25 @@ function saveProject() {
     version: '1.0'
   };
   const json = JSON.stringify(data, null, 2);
+  
+  // Option 1: Download file
   const blob = new Blob([json], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `tracktap_project_${new Date().toISOString().slice(0,10)}.json`;
+  const meet = document.getElementById('meet-name').value.trim().replace(/[^a-z0-9]/gi, '_');
+  a.download = `tracktap_${meet || 'project'}_${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('✓', 'Project saved to file');
+  
+  // Option 2: Also copy to clipboard (easier on phone)
+  navigator.clipboard.writeText(json).then(() => {
+    showToast('✓', 'Saved + copied to clipboard (paste into Drive/Notes)');
+  }).catch(() => {
+    showToast('✓', 'Project saved to file');
+  });
 }
  
 function loadProject(e) {
