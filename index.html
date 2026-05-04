@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Timing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+ 
+  :root {
+    --bg: #f2f2f7;
+    --bg2: #ffffff;
+    --bg3: #f2f2f7;
+    --surface: rgba(255,255,255,0.72);
+    --surface2: rgba(255,255,255,0.55);
+    --border: rgba(60,60,67,0.12);
+    --border2: rgba(60,60,67,0.08);
+    --text: #1c1c1e;
+    --text2: #3c3c43;
+    --text3: rgba(60,60,67,0.6);
+    --text4: rgba(60,60,67,0.36);
+    --green: #34c759;
+    --green-bg: rgba(52,199,89,0.1);
+    --green-border: rgba(52,199,89,0.25);
+    --blue: #007aff;
+    --blue-bg: rgba(0,122,255,0.08);
+    --blue-border: rgba(0,122,255,0.2);
+    --red: #ff3b30;
+    --red-bg: rgba(255,59,48,0.08);
+    --red-border: rgba(255,59,48,0.2);
+    --orange: #ff9500;
+    --pink: #ff2d55;
+    --radius: 12px;
+    --radius2: 16px;
+    --radius3: 22px;
+    --blur: blur(20px) saturate(180%);
+  }
+ 
+  body {
+    font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.4;
+  }
+ 
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+ 
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(242,242,247,0.85);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+ 
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(145deg, #34c759, #30b350);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(52,199,89,0.35);
+  }
+  .logo-text { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.5px; margin-top: -2px; }
+ 
+  .header-meet {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: var(--blur);
+  }
+  .header-meet input {
+    border: none; background: transparent;
+    font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text2);
+    outline: none; width: 200px;
+  }
+  .header-meet .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(52,199,89,0.2);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 3px rgba(52,199,89,0.2)} 50%{box-shadow:0 0 0 5px rgba(52,199,89,0.1)} }
+ 
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-ghost {
+    height: 32px; padding: 0 14px;
+    background: var(--surface);
+    backdrop-filter: var(--blur);
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+    font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text2);
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost:hover { background: var(--bg2); }
+  .btn-ghost:active { transform: scale(0.97); }
+ 
+  /* MAIN LAYOUT */
+  main { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
+ 
+  /* SECTION TITLES */
+  .section-title {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .section-sub { font-size: 14px; color: var(--text3); margin-bottom: 20px; }
+ 
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius2);
+    overflow: hidden;
+  }
+ 
+  /* TOOLBAR */
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-bottom: 20px;
+  }
+  .btn-primary {
+    height: 36px; padding: 0 18px;
+    background: var(--blue);
+    border: none; border-radius: 20px;
+    font-family: inherit; font-size: 14px; font-weight: 600; color: #fff;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary:hover { background: #0066d6; }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-green {
+    background: var(--green);
+  }
+  .btn-green:hover { background: #2db54a; }
+ 
+  .upload-btn {
+    position: relative; overflow: hidden;
+  }
+  .upload-btn input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+ 
+  /* HEATS GRID */
+  .heats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+ 
+  .heat-card {
+    background: var(--surface);
+    backdrop-filter: var(--blur);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius2);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .heat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: var(--radius2) var(--radius2) 0 0;
+  }
+  .heat-card.boys::before { background: linear-gradient(90deg, #007aff, #5ac8fa); }
+  .heat-card.girls::before { background: linear-gradient(90deg, #ff2d55, #ff6b9d); }
+  .heat-card.mixed::before { background: linear-gradient(90deg, #af52de, #5856d6); }
+  .heat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+    border-color: rgba(60,60,67,0.2);
+  }
+  .heat-card:active { transform: scale(0.98); }
+  .heat-card .heat-name {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    margin-bottom: 10px; line-height: 1.3;
+  }
+  .heat-card .heat-meta {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .heat-card .count { font-size: 12px; color: var(--text3); }
+  .heat-chip {
+    font-size: 11px; font-weight: 600; padding: 3px 10px;
+    border-radius: 20px; letter-spacing: 0.2px;
+  }
+  .chip-start { background: var(--blue-bg); color: var(--blue); border: 0.5px solid var(--blue-border); }
+  .chip-done { background: var(--green-bg); color: var(--green); border: 0.5px solid var(--green-border); }
+  .chip-empty { background: rgba(60,60,67,0.06); color: var(--text3); font-size:11px; padding:3px 10px; border-radius:20px; }
+ 
+  /* ATHLETES TABLE */
+  .table-header {
+    padding: 14px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 0.5px solid var(--border2);
+  }
+  .table-header-left { display: flex; align-items: center; gap: 10px; }
+  .table-header .title { font-size: 15px; font-weight: 600; }
+  .count-pill {
+    background: rgba(60,60,67,0.08);
+    color: var(--text3);
+    font-size: 12px; font-weight: 500;
+    padding: 2px 8px; border-radius: 10px;
+  }
+ 
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    padding: 10px 20px;
+    text-align: left; font-size: 11px; font-weight: 600;
+    color: var(--text3); letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 0.5px solid var(--border2);
+    background: rgba(242,242,247,0.5);
+  }
+  tbody tr { border-bottom: 0.5px solid var(--border2); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,0,0,0.018); }
+  tbody td { padding: 12px 20px; color: var(--text2); }
+  .lane-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: rgba(60,60,67,0.06);
+    border-radius: 6px;
+    font-size: 12px; font-weight: 600; color: var(--text2);
+    font-variant-numeric: tabular-nums;
+  }
+  .btn-del {
+    background: none; border: none; cursor: pointer;
+    font-size: 12px; color: var(--red); font-family: inherit;
+    padding: 4px 10px; border-radius: 8px; transition: background 0.1s;
+  }
+  .btn-del:hover { background: var(--red-bg); }
+ 
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center; padding: 48px 20px;
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.35; }
+  .empty-title { font-size: 15px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+  .empty-sub { font-size: 13px; color: var(--text3); }
+ 
+  /* TIMER SECTION */
+  #timer-section { margin-top: 28px; }
+ 
+  .timer-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .timer-heat-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .timer-heat-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+  .timer-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+ 
+  .btn-save {
+    height: 36px; padding: 0 20px;
+    background: var(--text);
+    color: #fff; border: none; border-radius: 20px;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-save:hover { background: #333; }
+  .btn-save:active { transform: scale(0.97); }
+ 
+  .timer-grid {
+    display: grid;
+    grid-template-columns: 240px 1fr 320px;
+    gap: 16px;
+    align-items: start;
+  }
+ 
+  @media (max-width: 900px) {
+    .timer-grid { grid-template-columns: 1fr; }
+  }
+ 
+  /* ATHLETES PANEL */
+  .panel-title {
+    font-size: 12px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 14px 16px 10px;
+    border-bottom: 0.5px solid var(--border2);
+  }
+  .athletes-scroll { max-height: 520px; overflow-y: auto; }
+ 
+  .athlete-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 0.5px solid var(--border2);
+    transition: background 0.1s;
+  }
+  .athlete-item:last-child { border-bottom: none; }
+  .athlete-item:hover { background: rgba(0,0,0,0.025); }
+  .athlete-item:active { background: rgba(0,0,0,0.04); }
+  .athlete-item.assigned { opacity: 0.45; pointer-events: none; }
+ 
+  .ath-lane {
+    width: 32px; height: 32px; flex-shrink: 0;
+    background: rgba(60,60,67,0.06);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--text2);
+  }
+  .ath-info { flex: 1; min-width: 0; }
+  .ath-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ath-team { font-size: 11px; color: var(--text3); }
+  .ath-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; flex-shrink: 0;
+    background: var(--green-bg); color: var(--green);
+    border: 0.5px solid var(--green-border);
+  }
+ 
+  .div-label {
+    font-size: 10px; font-weight: 600; color: var(--text4);
+    text-transform: uppercase; letter-spacing: 1px;
+    padding: 8px 16px 4px;
+  }
+ 
+  .group-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 16px 5px;
+    cursor: pointer; user-select: none;
+    transition: background 0.1s;
+    border-bottom: 0.5px solid var(--border2);
+  }
+  .group-header:hover { background: rgba(0,0,0,0.025); }
+  .group-header-left { display: flex; align-items: center; gap: 7px; }
+  .group-label {
+    font-size: 10px; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .group-count {
+    font-size: 10px; color: var(--text4);
+    background: rgba(60,60,67,0.07);
+    padding: 1px 7px; border-radius: 10px;
+  }
+  .group-chevron {
+    font-size: 11px; color: var(--text4);
+    transition: transform 0.22s ease;
+    line-height: 1;
+  }
+  .group-chevron.open { transform: rotate(90deg); }
+  .group-body { overflow: hidden; transition: max-height 0.25s ease, opacity 0.2s ease; }
+  .group-body.collapsed { max-height: 0 !important; opacity: 0; pointer-events: none; }
+
+  .athletes-table-content {
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+  }
+  .athletes-table-content.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+  }
+ 
+  /* TIMER CENTER */
+  .timer-center { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+ 
+  .timer-display-wrap {
+    width: 100%;
+    background: var(--surface);
+    backdrop-filter: var(--blur);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius3);
+    padding: 32px 24px;
+    text-align: center;
+    transition: box-shadow 0.4s;
+  }
+  .timer-display-wrap.running {
+    box-shadow: 0 0 0 3px rgba(52,199,89,0.2), 0 0 40px rgba(52,199,89,0.08);
+    border-color: rgba(52,199,89,0.3);
+  }
+  .timer-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
+  #timer-display {
+    font-size: 68px; font-weight: 300; letter-spacing: -3px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .timer-unit { font-size: 11px; color: var(--text4); letter-spacing: 2px; }
+ 
+  .timer-controls { display: flex; gap: 10px; width: 100%; }
+  .btn-ctrl {
+    flex: 1; height: 44px; border: none; border-radius: var(--radius);
+    font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-ctrl:active { transform: scale(0.96); }
+  .btn-start { background: var(--green); color: #fff; }
+  .btn-start:hover { background: #2db54a; }
+  .btn-pause { background: rgba(255,149,0,0.12); color: var(--orange); border: 0.5px solid rgba(255,149,0,0.25); }
+  .btn-pause:hover { background: rgba(255,149,0,0.18); }
+  .btn-reset { flex: 0 0 44px; background: rgba(60,60,67,0.08); color: var(--text2); }
+  .btn-reset:hover { background: rgba(60,60,67,0.14); }
+ 
+  /* TAP BUTTON */
+  .tap-wrap { width: 100%; }
+  .tap-btn {
+    width: 100%;
+    height: 176px;
+    background: linear-gradient(145deg, #007aff, #ffd700);
+    border: none; border-radius: var(--radius2);
+    font-family: inherit; font-size: 28px; font-weight: 700; color: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    transition: all 0.1s;
+    letter-spacing: -0.3px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,122,255,0.3);
+  }
+  .tap-btn:hover { background: linear-gradient(145deg, #0066d6, #ffcc00); box-shadow: 0 6px 28px rgba(0,122,255,0.4); }
+  .tap-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 10px rgba(0,122,255,0.3);
+  }
+  .tap-btn .tap-icon { font-size: 28px; }
+  .tap-ripple {
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transform: scale(0); animation: ripple 0.4s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+ 
+  .tap-hint { font-size: 12px; color: var(--text3); text-align: center; margin-top: 6px; }
+  .tap-count-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 20px; padding: 2px 10px;
+    font-size: 13px; font-weight: 700;
+  }
+ 
+  /* FINISHES PANEL */
+  .finishes-scroll { max-height: 520px; overflow-y: auto; }
+ 
+  .finish-row {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border2);
+    display: flex; gap: 10px; align-items: center;
+    animation: slideIn 0.2s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } }
+  .finish-row:last-child { border-bottom: none; }
+ 
+  .place-num {
+    width: 28px; height: 28px; flex-shrink: 0;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .place-1 { background: rgba(255,215,0,0.15); color: #b8860b; }
+  .place-2 { background: rgba(192,192,192,0.2); color: #888; }
+  .place-3 { background: rgba(205,127,50,0.15); color: #8b4513; }
+  .place-n { background: rgba(60,60,67,0.08); color: var(--text3); }
+ 
+  .finish-time {
+    font-size: 17px; font-weight: 500; color: var(--text);
+    font-variant-numeric: tabular-nums; letter-spacing: -0.5px;
+    flex-shrink: 0; min-width: 90px;
+  }
+  .finish-delta { font-size: 10px; color: var(--text3); margin-top: 1px; }
+ 
+  .finish-assign { flex: 1; min-width: 0; }
+  .finish-select {
+    width: 100%; padding: 7px 10px;
+    background: rgba(60,60,67,0.06);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit; font-size: 13px; color: var(--text2);
+    outline: none; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  .finish-select:focus { border-color: rgba(0,122,255,0.4); }
+ 
+  .finish-name {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    background: rgba(52,199,89,0.06);
+    border: 0.5px solid var(--green-border);
+    border-radius: 10px; padding: 7px 10px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 140px;
+  }
+  .btn-unassign {
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 16px;
+    width: 28px; height: 28px;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s; flex-shrink: 0;
+  }
+  .btn-unassign:hover { background: var(--red-bg); color: var(--red); }
+ 
+  /* RESULTS SECTION */
+  #results-section { margin-top: 36px; }
+  .result-heat { margin-bottom: 20px; }
+  .result-heat-title {
+    font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+  }
+ 
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+ 
+  .modal {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius3);
+    padding: 28px;
+    width: 100%; max-width: 400px; margin: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal-title { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 22px; }
+  .modal-close {
+    float: right; background: rgba(60,60,67,0.08); border: none;
+    width: 28px; height: 28px; border-radius: 50%;
+    font-size: 16px; cursor: pointer; color: var(--text3);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.1s;
+  }
+  .modal-close:hover { background: rgba(60,60,67,0.14); }
+ 
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%; padding: 10px 14px;
+    background: rgba(60,60,67,0.06);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit; font-size: 15px; color: var(--text);
+    outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: rgba(0,122,255,0.4); background: rgba(0,122,255,0.02); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 22px; }
+  .modal-btns .btn-primary { flex: 1; height: 44px; font-size: 15px; }
+  .btn-cancel {
+    height: 44px; padding: 0 20px;
+    background: rgba(60,60,67,0.08);
+    border: none; border-radius: 22px;
+    font-family: inherit; font-size: 15px; font-weight: 500; color: var(--text2);
+    cursor: pointer; flex: 1;
+    transition: background 0.1s;
+  }
+  .btn-cancel:hover { background: rgba(60,60,67,0.14); }
+ 
+  /* SETTINGS MODAL */
+  .setting-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 0.5px solid var(--border2);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 15px; font-weight: 500; color: var(--text); }
+  .setting-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+ 
+  /* TOGGLE */
+  .toggle { position: relative; display: inline-block; width: 44px; height: 26px; }
+  .toggle input { display: none; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: rgba(60,60,67,0.15); border-radius: 13px;
+    transition: background 0.2s; cursor: pointer;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 22px; height: 22px; left: 2px; top: 2px;
+    background: #fff; border-radius: 11px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--green); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+ 
+  /* KEYBOARD HINT */
+  kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px;
+    background: rgba(60,60,67,0.08);
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text2);
+  }
+ 
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: rgba(30,30,32,0.92);
+    backdrop-filter: var(--blur);
+    color: #fff;
+    padding: 12px 18px; border-radius: 14px;
+    font-size: 14px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    z-index: 999;
+    transition: all 0.3s;
+    border: 0.5px solid rgba(255,255,255,0.12);
+  }
+  .toast .toast-icon { font-size: 16px; }
+  .toast.out { opacity: 0; transform: translateY(8px); }
+ 
+  /* DIVIDER */
+  .divider { height: 0.5px; background: var(--border); margin: 24px 0; }
+ 
+  .hidden { display: none !important; }
+  .spacer { height: 16px; }
+ 
+  @media(max-width: 640px) {
+    header { padding: 0 16px; }
+    main { padding: 20px 16px 48px; }
+    .header-meet { display: none; }
+    #timer-display { font-size: 52px; }
+  }
+</style>
+</head>
+<body>
+ 
+<header style="height:72px; max-width:1120px; margin:0 auto; padding:0 24px; justify-content:space-between;">
+  <div class="header-meet" style="width:420px; max-width:100%;">
+    <div class="dot"></div>
+    <input id="meet-name" type="text" value="My Track Meet 2026" placeholder="Event / Meet name (e.g. Spring Invitational 2026)" onchange="saveMeetName()" style="width:380px; font-size:15px;">
+  </div>
+ 
+  <div class="header-actions">
+    <button class="btn-ghost" onclick="showSettings()">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v1.5M8 13.5V15M15 8h-1.5M2.5 8H1M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7L3.6 3.6"/></svg>
+    </button>
+  </div>
+</header>
+ 
+<main>
+ 
+  <!-- MANAGE SECTION -->
+  <div id="manage-section">
+    <div class="section-title">Athletes & Heats</div>
+    <div class="section-sub">Set up your roster, then tap any heat card to begin timing</div>
+ 
+    <div class="toolbar">
+      <label class="btn-ghost upload-btn">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 12V3M4 7l4-4 4 4M2 13h12"/></svg>
+        Upload CSV
+        <input type="file" id="csv-upload" accept=".csv" onchange="handleCSVUpload(event)">
+      </label>
+      <span style="font-size:11px;color:var(--text3);">Event, Heat, Name, Grade, Gender, School</span>
+      <button class="btn-primary" onclick="exportAllResults()" style="margin-left:auto;">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 1v9M4 7l4 4 4-4M2 13h12"/></svg>
+        Export CSV
+      </button>
+      <button class="btn-primary btn-green" onclick="showAddModal()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg>
+        Add Athlete
+      </button>
+    </div>
+ 
+    <!-- Heats Grid -->
+    <div id="heats-grid" class="heats-grid"></div>
+ 
+    <!-- Athletes Table -->
+    <div class="card">
+      <div class="table-header" onclick="toggleAthletesTable()" style="cursor:pointer; user-select:none;">
+        <div class="table-header-left">
+          <span class="group-chevron open" id="athletes-chevron">▶</span>
+          <span class="title">All Athletes</span>
+          <span id="athlete-count" class="count-pill">0</span>
+        </div>
+        <button class="btn-del" onclick="event.stopImmediatePropagation(); clearAllData()">Clear roster</button>
+      </div>
+      <div id="athletes-table-content" class="athletes-table-content" style="max-height: 800px;">
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Heat</th>
+                <th style="width:60px;text-align:center;">Lane</th>
+                <th>Athlete</th>
+                <th>Team</th>
+                <th style="width:80px;text-align:right;"></th>
+              </tr>
+            </thead>
+            <tbody id="athletes-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- TIMER SECTION -->
+  <div id="timer-section" class="hidden">
+    <div class="timer-header">
+      <div>
+        <div class="timer-heat-name" id="heat-title"></div>
+        <div class="timer-heat-sub">
+          <span id="assigned-count"></span>
+          <span style="color:var(--text4);margin:0 6px;">·</span>
+          <span id="next-place" style="color:var(--green);font-weight:600;"></span>
+        </div>
+      </div>
+      <div class="timer-actions">
+        <button class="btn-save" onclick="saveAndClearHeat()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 11v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2M8 1v8M5 6l3 3 3-3"/></svg>
+          Save & Next Heat
+        </button>
+        <button class="btn-ghost" onclick="closeTimer()">Close</button>
+      </div>
+    </div>
+ 
+    <div class="timer-grid">
+ 
+      <!-- Athletes Panel -->
+      <div class="card">
+        <div class="panel-title">Athletes in Heat</div>
+        <div class="athletes-scroll" id="athletes-list"></div>
+      </div>
+ 
+      <!-- Timer + TAP -->
+      <div class="timer-center">
+        <div class="timer-display-wrap" id="timer-container">
+          <div class="timer-label">Elapsed Time</div>
+          <div id="timer-display">00:00.000</div>
+          <div class="timer-unit">MIN · SEC · MS</div>
+        </div>
+ 
+        <div class="timer-controls" style="width:100%;">
+          <button class="btn-ctrl btn-start" id="start-btn" onclick="startTimer()">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
+            Start
+          </button>
+          <button class="btn-ctrl btn-pause" onclick="stopTimer()">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>
+            Pause
+          </button>
+          <button class="btn-ctrl btn-reset" onclick="resetTimer()" title="Reset">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8A5.5 5.5 0 108 2.5H5.5"/><path d="M5.5 2v3H2.5"/></svg>
+          </button>
+        </div>
+ 
+        <div class="tap-wrap">
+          <button class="tap-btn" id="tap-btn" onclick="tapFinish(event)">
+            <span>TAP FINISH</span>
+            <span class="tap-count-badge" id="tap-count">0</span>
+          </button>
+          <div class="tap-hint">Press <kbd>T</kbd> to tap · <kbd>S</kbd> to start/stop</div>
+        </div>
+      </div>
+ 
+      <!-- Finishes Panel -->
+      <div class="card">
+        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Finish Order</span>
+          <button class="btn-del" onclick="clearFinishes()" style="text-transform:none;font-size:12px;font-weight:500;padding:2px 8px;">Clear</button>
+        </div>
+        <div class="finishes-scroll" id="finishes-list"></div>
+      </div>
+ 
+    </div>
+  </div>
+ 
+  <!-- RESULTS SECTION -->
+  <div id="results-section" class="spacer">
+    <div class="divider"></div>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div class="section-title">Meet Results</div>
+        <div class="section-sub">All recorded athletes • Official times & placements</div>
+      </div>
+      <button class="btn-primary" onclick="exportAllResults()" style="height:36px; padding:0 16px; font-size:13px;">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 1v9M4 7l4 4 4-4M2 13h12"/></svg>
+        Export CSV
+      </button>
+    </div>
+    
+    <!-- Master All Athletes Results Table -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="table-header">
+        <div class="table-header-left">
+          <span class="title">All Recorded Athletes</span>
+          <span id="total-results-count" class="count-pill">0</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto; max-height:420px;">
+        <table id="all-results-table">
+          <thead>
+            <tr>
+              <th>Heat / Event</th>
+              <th style="width:60px;text-align:center;">Place</th>
+              <th>Time</th>
+              <th>Athlete</th>
+              <th>Team</th>
+              <th style="width:70px;text-align:center;">Lane</th>
+            </tr>
+          </thead>
+          <tbody id="all-results-body"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Per-Heat Breakdown -->
+    <div class="section-title" style="font-size:17px; margin-top:8px;">Results by Heat</div>
+    <div id="results-content"></div>
+  </div>
+ 
+</main>
+ 
+<!-- ADD MODAL -->
+<div id="add-modal" class="modal-overlay" onclick="if(event.target===this)hideAddModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="hideAddModal()">✕</button>
+    <div class="modal-title">Add Athlete</div>
+    <div class="form-group">
+      <label class="form-label">Heat / Event</label>
+      <input id="add-heat" class="form-input" type="text" placeholder="100m — Heat 1 — Boys Grade 10">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Lane</label>
+        <input id="add-lane" class="form-input" type="number" value="1" min="1" max="12">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Team</label>
+        <input id="add-team" class="form-input" type="text" placeholder="School / Club">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input id="add-name" class="form-input" type="text" placeholder="Jordan Lee">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary btn-green" onclick="addAthlete()">Add to Roster</button>
+      <button class="btn-cancel" onclick="hideAddModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" class="modal-overlay" onclick="if(event.target===this)hideSettings()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="hideSettings()">✕</button>
+    <div class="modal-title">Settings</div>
+ 
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Auto-assign last athlete</div>
+        <div class="setting-sub">Fills the final lane automatically</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="auto-assign-toggle" checked onchange="updateSettings()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+ 
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Sound on tap</div>
+        <div class="setting-sub">Subtle confirmation tone</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="sound-toggle" checked onchange="updateSettings()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+ 
+    <div class="setting-row" style="border:none;padding-bottom:0;">
+      <div>
+        <div class="setting-label" style="font-size:13px;color:var(--text3);">Keyboard shortcuts</div>
+        <div class="setting-sub" style="margin-top:6px;line-height:1.8;">
+          <kbd>T</kbd> Tap finish &nbsp; <kbd>S</kbd> Start / Stop &nbsp; <kbd>Esc</kbd> Close
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<script>
+let athletes = [];
+let results = {};
+let currentHeat = null;
+let currentAthletes = [];
+let recordedFinishes = [];
+let isRunning = false;
+let startTime = 0;
+let pausedTime = 0;
+let timerInterval = null;
+let settings = { autoAssign: true, sound: true };
+ 
+function saveToStorage() {
+  localStorage.setItem('tt_ath_v3', JSON.stringify(athletes));
+  localStorage.setItem('tt_res_v3', JSON.stringify(results));
+  localStorage.setItem('tt_set_v3', JSON.stringify(settings));
+}
+ 
+function loadFromStorage() {
+  try {
+    const a = localStorage.getItem('tt_ath_v3');
+    if (a) athletes = JSON.parse(a);
+    const r = localStorage.getItem('tt_res_v3');
+    if (r) results = JSON.parse(r);
+    const s = localStorage.getItem('tt_set_v3');
+    if (s) settings = { ...settings, ...JSON.parse(s) };
+  } catch(e) {}
+}
+ 
+function saveMeetName() {
+  localStorage.setItem('tt_meet', document.getElementById('meet-name').value.trim());
+}
+ 
+function loadMeetName() {
+  const n = localStorage.getItem('tt_meet');
+  if (n) document.getElementById('meet-name').value = n;
+}
+ 
+function formatTime(ms) {
+  if (!ms || ms < 0) return '00:00.000';
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const ms3 = Math.floor(ms % 1000);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms3).padStart(3,'0')}`;
+}
+ 
+function getCurrentElapsed() {
+  if (!startTime) return 0;
+  return isRunning ? Date.now() - startTime : pausedTime;
+}
+ 
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  if (el) el.textContent = formatTime(getCurrentElapsed());
+}
+ 
+function startTimer() {
+  if (isRunning) return;
+  startTime = startTime === 0 ? Date.now() : Date.now() - pausedTime;
+  isRunning = true;
+  timerInterval = setInterval(updateTimerDisplay, 16);
+  const btn = document.getElementById('start-btn');
+  if (btn) { btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> Running`; btn.disabled = true; btn.style.opacity = '0.65'; }
+  const c = document.getElementById('timer-container');
+  if (c) c.classList.add('running');
+}
+ 
+function stopTimer() {
+  if (!isRunning) return;
+  clearInterval(timerInterval); isRunning = false;
+  pausedTime = Date.now() - startTime;
+  const btn = document.getElementById('start-btn');
+  if (btn) { btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> Resume`; btn.disabled = false; btn.style.opacity = '1'; }
+  const c = document.getElementById('timer-container');
+  if (c) c.classList.remove('running');
+  updateTimerDisplay();
+}
+ 
+function resetTimer() {
+  clearInterval(timerInterval); isRunning = false; startTime = 0; pausedTime = 0;
+  const el = document.getElementById('timer-display');
+  if (el) el.textContent = '00:00.000';
+  const btn = document.getElementById('start-btn');
+  if (btn) { btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> Start`; btn.disabled = false; btn.style.opacity = '1'; }
+  const c = document.getElementById('timer-container');
+  if (c) c.classList.remove('running');
+}
+ 
+function tapFinish(e) {
+  const el = getCurrentElapsed();
+  if (el === 0) { showToast('⚠️', 'Start the timer first'); return; }
+ 
+  if (e) {
+    const btn = document.getElementById('tap-btn');
+    const rect = btn.getBoundingClientRect();
+    const rip = document.createElement('span');
+    rip.className = 'tap-ripple';
+    const size = Math.max(rect.width, rect.height);
+    rip.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    btn.appendChild(rip);
+    setTimeout(() => rip.remove(), 450);
+  }
+ 
+  const finish = { place: recordedFinishes.length + 1, timeMs: el, athleteId: null };
+  recordedFinishes.push(finish);
+  renderFinishesList();
+  updateAssignedCount();
+  if (settings.sound) playTap();
+  if (navigator.vibrate) navigator.vibrate(30);
+  document.getElementById('tap-count').textContent = recordedFinishes.length;
+ 
+  if (settings.autoAssign && currentAthletes.length > 0) {
+    const unassigned = currentAthletes.filter(a => !recordedFinishes.some(f => f.athleteId === a.id));
+    if (unassigned.length === 1) {
+      setTimeout(() => {
+        const last = recordedFinishes[recordedFinishes.length - 1];
+        if (last && !last.athleteId) {
+          last.athleteId = unassigned[0].id;
+          renderFinishesList(); renderAthletesList(); updateAssignedCount();
+        }
+      }, 200);
+    }
+  }
+ 
+  setTimeout(() => {
+    const l = document.getElementById('finishes-list');
+    if (l) l.scrollTop = l.scrollHeight;
+  }, 50);
+}
+ 
+function playTap() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = 1047;
+    g.gain.value = 0.06;
+    g.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.13);
+  } catch(e) {}
+}
+ 
+function clearFinishes() {
+  if (!recordedFinishes.length) return;
+  if (confirm('Clear all recorded times?')) {
+    recordedFinishes = [];
+    renderFinishesList(); updateAssignedCount();
+    document.getElementById('tap-count').textContent = '0';
+  }
+}
+ 
+function assignToNextUnassigned(athleteId) {
+  const next = recordedFinishes.find(f => !f.athleteId);
+  if (!next) { showToast('ℹ️', 'All places assigned. Tap FINISH to record more.'); return; }
+  next.athleteId = athleteId;
+  renderFinishesList(); renderAthletesList(); updateAssignedCount();
+}
+ 
+function assignAthlete(place, athleteId) {
+  if (!athleteId) return;
+  const f = recordedFinishes.find(x => x.place === place);
+  if (f) { f.athleteId = athleteId; renderFinishesList(); renderAthletesList(); updateAssignedCount(); }
+}
+ 
+function unassignAthlete(place) {
+  const f = recordedFinishes.find(x => x.place === place);
+  if (f) { f.athleteId = null; renderFinishesList(); renderAthletesList(); updateAssignedCount(); }
+}
+ 
+function updateAssignedCount() {
+  const el = document.getElementById('assigned-count');
+  const np = document.getElementById('next-place');
+  if (!el || !currentAthletes.length) return;
+  const assigned = recordedFinishes.filter(f => f.athleteId).length;
+  el.textContent = `${assigned} of ${currentAthletes.length} assigned`;
+  const nextIdx = recordedFinishes.findIndex(f => !f.athleteId);
+  if (np) {
+    if (nextIdx >= 0) np.textContent = `Next: #${nextIdx + 1}`;
+    else if (recordedFinishes.length > 0) np.textContent = 'All done ✓';
+    else np.textContent = '';
+  }
+}
+ 
+// Track which groups are collapsed (persisted across re-renders)
+let collapsedGroups = {};
+ 
+function toggleGroup(key) {
+  collapsedGroups[key] = !collapsedGroups[key];
+  const body = document.getElementById('grp-' + btoa(key).replace(/=/g,''));
+  const chevron = document.getElementById('chv-' + btoa(key).replace(/=/g,''));
+  if (body) {
+    if (collapsedGroups[key]) {
+      body.classList.add('collapsed');
+      if (chevron) chevron.classList.remove('open');
+    } else {
+      body.classList.remove('collapsed');
+      if (chevron) chevron.classList.add('open');
+    }
+  }
+}
+
+let athletesTableCollapsed = false;
+
+function toggleAthletesTable() {
+  athletesTableCollapsed = !athletesTableCollapsed;
+  const content = document.getElementById('athletes-table-content');
+  const chevron = document.getElementById('athletes-chevron');
+  if (content) {
+    if (athletesTableCollapsed) {
+      content.classList.add('collapsed');
+      if (chevron) chevron.classList.remove('open');
+    } else {
+      content.classList.remove('collapsed');
+      if (chevron) chevron.classList.add('open');
+    }
+  }
+}
+ 
+function renderAthletesList() {
+  const container = document.getElementById('athletes-list');
+  if (!container) return;
+  if (!currentAthletes.length) { container.innerHTML = `<div class="empty-state"><div class="empty-sub">No athletes loaded</div></div>`; return; }
+ 
+  const groups = {};
+  currentAthletes.forEach(a => {
+    const g = a.gender || 'Mixed';
+    const gr = a.grade ? `Grade ${a.grade}` : '';
+    const key = [g, gr].filter(Boolean).join(' · ');
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(a);
+  });
+ 
+  const order = ['Boys','Girls','Mixed'];
+  const keys = Object.keys(groups).sort((a,b) => {
+    const ga = a.split(' · ')[0], gb = b.split(' · ')[0];
+    return (order.indexOf(ga)||99) - (order.indexOf(gb)||99);
+  });
+ 
+  let html = '';
+  keys.forEach(key => {
+    const safeId = btoa(key).replace(/=/g,'');
+    const collapsed = !!collapsedGroups[key];
+    const count = groups[key].length;
+    const assignedCount = groups[key].filter(a => recordedFinishes.some(f => f.athleteId === a.id)).length;
+ 
+    html += `
+      <div class="group-header" onclick="toggleGroup('${key.replace(/'/g,"\\'")}')">
+        <div class="group-header-left">
+          <span class="group-chevron ${collapsed ? '' : 'open'}" id="chv-${safeId}">▶</span>
+          <span class="group-label">${key}</span>
+          <span class="group-count">${assignedCount}/${count}</span>
+        </div>
+      </div>
+      <div class="group-body ${collapsed ? 'collapsed' : ''}" id="grp-${safeId}" style="max-height:${collapsed ? '0' : count * 65 + 'px'};">`;
+ 
+    groups[key].forEach(ath => {
+      const assigned = recordedFinishes.some(f => f.athleteId === ath.id);
+      html += `
+        <div class="athlete-item ${assigned ? 'assigned' : ''}" onclick="assignToNextUnassigned('${ath.id}')">
+          <div class="ath-lane">${ath.lane}</div>
+          <div class="ath-info">
+            <div class="ath-name">${ath.name}</div>
+            <div class="ath-team">${ath.team}</div>
+          </div>
+          ${assigned ? '<span class="ath-badge">✓</span>' : ''}
+        </div>`;
+    });
+ 
+    html += `</div>`;
+  });
+ 
+  container.innerHTML = html;
+}
+ 
+function renderFinishesList() {
+  const c = document.getElementById('finishes-list');
+  if (!c) return;
+  if (!recordedFinishes.length) {
+    c.innerHTML = `<div class="empty-state"><div class="empty-icon">🏁</div><div class="empty-title">No finishes yet</div><div class="empty-sub">Tap the red button as each athlete crosses</div></div>`;
+    return;
+  }
+  const leader = recordedFinishes[0].timeMs;
+  const available = currentAthletes.filter(a => !recordedFinishes.some(f => f.athleteId === a.id));
+  const placeClasses = ['place-1','place-2','place-3'];
+  let html = '';
+  recordedFinishes.forEach((fin, i) => {
+    const delta = fin.timeMs - leader;
+    const deltaStr = i === 0 ? 'Leader' : `+${(delta/1000).toFixed(3)}s`;
+    const pc = placeClasses[i] || 'place-n';
+    const ath = fin.athleteId ? currentAthletes.find(a => a.id === fin.athleteId) : null;
+    let assignHtml = '';
+    if (ath) {
+      assignHtml = `<div class="finish-name">${ath.name}</div>`;
+    } else {
+      let opts = `<option value="">Select athlete…</option>`;
+      available.forEach(a => { opts += `<option value="${a.id}">${a.name}</option>`; });
+      assignHtml = `<select class="finish-select" onchange="assignAthlete(${fin.place}, this.value)">${opts}</select>`;
+    }
+    html += `
+      <div class="finish-row">
+        <div class="place-num ${pc}">#${fin.place}</div>
+        <div>
+          <div class="finish-time">${formatTime(fin.timeMs)}</div>
+          <div class="finish-delta">${deltaStr}</div>
+        </div>
+        <div class="finish-assign" style="display:flex;align-items:center;gap:6px;">
+          ${assignHtml}
+          ${ath ? `<button class="btn-unassign" onclick="unassignAthlete(${fin.place})" title="Unassign">✕</button>` : ''}
+        </div>
+      </div>`;
+  });
+  c.innerHTML = html;
+}
+ 
+function renderAthletesTable() {
+  const tbody = document.getElementById('athletes-table-body');
+  const countEl = document.getElementById('athlete-count');
+  if (!tbody) return;
+  if (countEl) countEl.textContent = athletes.length;
+  if (!athletes.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">No athletes in roster</div><div class="empty-sub">Upload a CSV or add athletes manually</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = athletes.map(a => `
+    <tr>
+      <td style="font-size:13px;font-weight:500;color:var(--text2);">${a.heat}</td>
+      <td style="text-align:center;"><span class="lane-num">${a.lane}</span></td>
+      <td style="font-weight:600;font-size:14px;">${a.name}</td>
+      <td style="font-size:13px;color:var(--text3);">${a.team}</td>
+      <td style="text-align:right;"><button class="btn-del" onclick="deleteAthlete('${a.id}')">Remove</button></td>
+    </tr>`).join('');
+}
+ 
+function renderHeatsGrid() {
+  const c = document.getElementById('heats-grid');
+  if (!c) return;
+  const heats = [...new Set(athletes.map(a => a.heat))];
+  if (!heats.length) {
+    c.innerHTML = `<div class="card" style="grid-column:1/-1;padding:32px;text-align:center;border-style:dashed;"><div class="empty-icon">📋</div><div class="empty-sub">No heats yet. Upload a CSV or add athletes.</div></div>`;
+    return;
+  }
+  const sorted = heats.sort((a,b) => {
+    const ga = parseInt(a.match(/Grade (\d+)/)?.[1]||99), gb = parseInt(b.match(/Grade (\d+)/)?.[1]||99);
+    if (ga!==gb) return ga-gb;
+    const go = {Boys:1,Girls:2,Mixed:3};
+    const gsa = a.match(/(Boys|Girls|Mixed)/)?.[1]||'Mixed';
+    const gsb = b.match(/(Boys|Girls|Mixed)/)?.[1]||'Mixed';
+    return (go[gsa]||3)-(go[gsb]||3);
+  });
+ 
+  c.innerHTML = sorted.map(heat => {
+    const count = athletes.filter(a => a.heat === heat).length;
+    const done = !!results[heat];
+    const cls = heat.includes('Boys') ? 'boys' : heat.includes('Girls') ? 'girls' : 'mixed';
+    const safeHeat = heat.replace(/'/g, "\\'");
+    return `
+      <div class="heat-card ${cls}" onclick="loadHeat('${safeHeat}')">
+        <div class="heat-name">${heat}</div>
+        <div class="heat-meta">
+          <span class="count">${count} athlete${count!==1?'s':''}</span>
+          ${done ? `<span class="heat-chip chip-done">Done</span>` : `<span class="heat-chip chip-start">Start</span>`}
+        </div>
+      </div>`;
+  }).join('');
+}
+ 
+function renderResults() {
+  const c = document.getElementById('results-content');
+  const masterTbody = document.getElementById('all-results-body');
+  const countEl = document.getElementById('total-results-count');
+  if (!c) return;
+
+  const keys = Object.keys(results).sort();
+  if (!keys.length) {
+    c.innerHTML = `<div class="empty-state" style="padding:60px 20px;"><div class="empty-icon">🏆</div><div class="empty-title">No results yet</div><div class="empty-sub">Complete a heat to see official results</div></div>`;
+    if (masterTbody) masterTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px 20px;">No results recorded yet</td></tr>`;
+    if (countEl) countEl.textContent = '0';
+    return;
+  }
+
+  // Build flat list of all results for master table
+  let allResults = [];
+  keys.forEach(heat => {
+    results[heat].forEach(r => {
+      allResults.push({ ...r, heat });
+    });
+  });
+  // Sort by heat then place
+  allResults.sort((a, b) => {
+    if (a.heat !== b.heat) return a.heat.localeCompare(b.heat);
+    return a.place - b.place;
+  });
+
+  // Render master table
+  if (masterTbody) {
+    masterTbody.innerHTML = allResults.map(r => `
+      <tr>
+        <td style="font-size:12px;color:var(--text2);">${r.heat}</td>
+        <td style="text-align:center;"><span class="place-num ${r.place<=3?['place-1','place-2','place-3'][r.place-1]:'place-n'}" style="display:inline-flex;">#${r.place}</span></td>
+        <td style="font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;">${r.time}</td>
+        <td style="font-weight:600;">${r.name}</td>
+        <td style="color:var(--text3);font-size:13px;">${r.team}</td>
+        <td style="text-align:center;color:var(--text3);font-size:13px;">${r.lane || '—'}</td>
+      </tr>`).join('');
+  }
+  if (countEl) countEl.textContent = allResults.length;
+
+  // Render per-heat cards (existing)
+  c.innerHTML = keys.map(heat => `
+    <div class="result-heat">
+      <div class="result-heat-title">
+        ${heat}
+        <span class="count-pill">${results[heat].length} finishers</span>
+      </div>
+      <div class="card">
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th style="width:60px;">Place</th><th>Time</th><th>Athlete</th><th>Team</th><th style="width:70px;text-align:center;">Lane</th></tr></thead>
+            <tbody>${results[heat].map(r => `
+              <tr>
+                <td><span class="place-num ${r.place<=3?['place-1','place-2','place-3'][r.place-1]:'place-n'}" style="display:inline-flex;">#${r.place}</span></td>
+                <td style="font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;">${r.time}</td>
+                <td style="font-weight:600;">${r.name}</td>
+                <td style="color:var(--text3);font-size:13px;">${r.team}</td>
+                <td style="text-align:center;color:var(--text3);font-size:13px;">${r.lane || '—'}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`).join('');
+}
+ 
+function loadHeat(heat) {
+  currentHeat = heat;
+  currentAthletes = athletes.filter(a => a.heat === heat).sort((a,b) => a.lane - b.lane);
+  recordedFinishes = [];
+  collapsedGroups = {};
+ 
+  const sec = document.getElementById('timer-section');
+  sec.classList.remove('hidden');
+  document.getElementById('heat-title').textContent = heat;
+  document.getElementById('tap-count').textContent = '0';
+ 
+  renderAthletesList();
+  renderFinishesList();
+  updateAssignedCount();
+  resetTimer();
+ 
+  setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+ 
+function closeTimer() {
+  document.getElementById('timer-section').classList.add('hidden');
+  currentHeat = null; currentAthletes = []; recordedFinishes = [];
+  resetTimer();
+}
+ 
+function saveAndClearHeat() {
+  if (!currentHeat || !recordedFinishes.length) { showToast('⚠️', 'Record at least one finish time first.'); return; }
+  const unassigned = recordedFinishes.filter(f => !f.athleteId).length;
+  if (unassigned > 0 && !confirm(`${unassigned} finish(es) unassigned. Save anyway?`)) return;
+ 
+  results[currentHeat] = recordedFinishes.map(f => {
+    const a = f.athleteId ? currentAthletes.find(x => x.id === f.athleteId) : null;
+    return { place: f.place, timeMs: f.timeMs, time: formatTime(f.timeMs), athleteId: f.athleteId, name: a ? a.name : 'Unassigned', team: a ? a.team : '', lane: a ? a.lane : '' };
+  });
+ 
+  saveToStorage();
+  if (results[currentHeat].every(r => r.name !== 'Unassigned') && results[currentHeat].length >= 3) launchConfetti();
+ 
+  document.getElementById('timer-section').classList.add('hidden');
+  currentHeat = null; recordedFinishes = [];
+  renderHeatsGrid(); renderResults();
+  showToast('✓', `Results saved`);
+}
+ 
+function launchConfetti() {
+  const colors = ['#34c759','#007aff','#ff9500','#ff2d55','#af52de'];
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;left:${Math.random()*100}vw;top:-10px;width:8px;height:8px;border-radius:${Math.random()>.5?'50%':'2px'};background:${colors[i%colors.length]};z-index:9999;pointer-events:none;transition:transform 1.4s ease,opacity 1.2s ease`;
+      document.body.appendChild(el);
+      setTimeout(() => { el.style.transform = `translateY(${innerHeight+20}px) rotate(${Math.random()*360}deg)`; el.style.opacity = '0'; }, 30);
+      setTimeout(() => el.remove(), 1500);
+    }, i * 18);
+  }
+}
+ 
+function addAthlete() {
+  const heat = document.getElementById('add-heat').value.trim() || 'Heat 1';
+  const lane = parseInt(document.getElementById('add-lane').value) || 99;
+  const name = document.getElementById('add-name').value.trim();
+  const team = document.getElementById('add-team').value.trim() || 'Unattached';
+  if (!name) { document.getElementById('add-name').focus(); return; }
+  athletes.push({ id: 'a-' + Date.now().toString(36), heat, lane, name, team });
+  saveToStorage(); hideAddModal(); renderAthletesTable(); renderHeatsGrid();
+  showToast('✓', `Added ${name}`);
+}
+ 
+function showAddModal() { document.getElementById('add-modal').classList.add('open'); setTimeout(()=>document.getElementById('add-name').focus(),100); }
+function hideAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+function deleteAthlete(id) { if (!confirm('Remove this athlete?')) return; athletes = athletes.filter(a => a.id !== id); saveToStorage(); renderAthletesTable(); renderHeatsGrid(); }
+ 
+function handleCSVUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const parsed = parseCSV(ev.target.result);
+    if (!parsed.length) { showToast('⚠️', 'No valid rows found in CSV'); return; }
+    athletes = athletes.concat(parsed);
+    saveToStorage(); renderAthletesTable(); renderHeatsGrid();
+    showToast('✓', `Imported ${parsed.length} athletes`);
+  };
+  reader.readAsText(file); e.target.value = '';
+}
+ 
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].toLowerCase().split(',').map(h=>h.trim());
+  return lines.slice(1).filter(l=>l.trim()).map((line,i) => {
+    const vals = line.split(',').map(v=>v.trim());
+    const row = {}; headers.forEach((h,idx) => row[h]=vals[idx]||'');
+    const event = row.event||row['event name']||'';
+    const heatNum = row.heat||row['heat number']||'';
+    const grade = row.grade||row['grade level']||'';
+    const gender = row.gender||row.sex||'';
+    const lane = parseInt(row.lane||row.ln||'99')||99;
+    const name = row.name||row.athlete||'';
+    if (!name) return null;
+    const school = row.school||row.team||row.club||'Unattached';
+    let heatLabel = event||'Event';
+    if (event && heatNum) heatLabel = `${event} — Heat ${heatNum}`;
+    else if (heatNum) heatLabel = `Heat ${heatNum}`;
+    let extra = [gender, grade ? `Grade ${grade}` : ''].filter(Boolean).join(' ');
+    if (extra) heatLabel += ` — ${extra}`;
+    return { id: 'csv-'+Date.now().toString(36)+'-'+i, heat: heatLabel, lane, name, team: school, grade, gender };
+  }).filter(Boolean);
+}
+ 
+function loadSampleData() {
+  athletes = [
+    { id:'s1', heat:'100m — Heat 1 — Boys Grade 10', lane:1, name:'Alex Rivera', team:'Milpitas HS', grade:'10', gender:'Boys' },
+    { id:'s2', heat:'100m — Heat 1 — Boys Grade 10', lane:2, name:'Jordan Lee', team:'Valley Track Club', grade:'10', gender:'Boys' },
+    { id:'s3', heat:'100m — Heat 1 — Boys Grade 10', lane:3, name:'Sam Patel', team:'Speed City', grade:'10', gender:'Boys' },
+    { id:'s4', heat:'100m — Heat 1 — Boys Grade 10', lane:4, name:'Tyler Brooks', team:'Milpitas HS', grade:'10', gender:'Boys' },
+    { id:'s5', heat:'200m — Heat 1 — Girls Grade 9', lane:1, name:'Mia Chen', team:'East Bay Elite', grade:'9', gender:'Girls' },
+    { id:'s6', heat:'200m — Heat 1 — Girls Grade 9', lane:2, name:'Sofia Ramirez', team:'Valley Track Club', grade:'9', gender:'Girls' },
+    { id:'s7', heat:'200m — Heat 1 — Girls Grade 9', lane:3, name:'Ava Thompson', team:'Speed City', grade:'9', gender:'Girls' },
+    { id:'s8', heat:'400m — Heat 1 — Mixed', lane:1, name:'Liam Torres', team:'Milpitas HS', grade:'11', gender:'Mixed' },
+    { id:'s9', heat:'400m — Heat 1 — Mixed', lane:2, name:'Noah Kim', team:'Valley Track Club', grade:'11', gender:'Mixed' },
+    { id:'s10', heat:'400m — Heat 1 — Mixed', lane:3, name:'Emma Watson', team:'East Bay Elite', grade:'10', gender:'Mixed' },
+    { id:'s11', heat:'400m — Heat 1 — Mixed', lane:4, name:'Lucas Martinez', team:'Speed City', grade:'11', gender:'Mixed' },
+  ];
+  // Pre-load a completed result so the Results section has something to show
+  results['100m — Heat 1 — Boys Grade 10'] = [
+    { place:1, timeMs:11345, time:'00:11.345', athleteId:'s1', name:'Alex Rivera', team:'Milpitas HS', lane:1 },
+    { place:2, timeMs:11420, time:'00:11.420', athleteId:'s3', name:'Sam Patel', team:'Speed City', lane:3 },
+    { place:3, timeMs:11510, time:'00:11.510', athleteId:'s2', name:'Jordan Lee', team:'Valley Track Club', lane:2 },
+    { place:4, timeMs:11980, time:'00:11.980', athleteId:'s4', name:'Tyler Brooks', team:'Milpitas HS', lane:4 },
+  ];
+  saveToStorage(); renderAthletesTable(); renderHeatsGrid(); renderResults();
+  showToast('✓', 'Demo data loaded — tap a heat card to begin timing');
+}
+ 
+function clearAllData() {
+  if (!confirm('Delete ALL athletes and results?')) return;
+  athletes = []; results = {};
+  localStorage.removeItem('tt_ath_v3'); localStorage.removeItem('tt_res_v3');
+  renderAthletesTable(); renderHeatsGrid(); renderResults();
+  document.getElementById('timer-section').classList.add('hidden');
+}
+ 
+function exportAllResults() {
+  if (!Object.keys(results).length) { showToast('ℹ️', 'No results to export'); return; }
+  let csv = 'Heat,Place,Time (s),Athlete,Team,Lane\n';
+  Object.keys(results).sort().forEach(heat => {
+    results[heat].forEach(r => { csv += `"${heat}",${r.place},${(r.timeMs/1000).toFixed(3)},"${r.name}","${r.team}",${r.lane||''}\n`; });
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = `tracktap_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+ 
+function saveProject() {
+  const data = {
+    athletes: athletes,
+    results: results,
+    meetName: document.getElementById('meet-name').value.trim(),
+    settings: settings,
+    version: '1.0'
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tracktap_project_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✓', 'Project saved to file');
+}
+ 
+function loadProject(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.athletes && Array.isArray(data.athletes)) {
+        athletes = data.athletes;
+      }
+      if (data.results && typeof data.results === 'object') {
+        results = data.results;
+      }
+      if (data.settings) {
+        settings = { ...settings, ...data.settings };
+      }
+      if (data.meetName) {
+        document.getElementById('meet-name').value = data.meetName;
+        localStorage.setItem('tt_meet', data.meetName);
+      }
+      saveToStorage();
+      renderAthletesTable();
+      renderHeatsGrid();
+      renderResults();
+      showToast('✓', `Project loaded: ${athletes.length} athletes`);
+    } catch (err) {
+      showToast('⚠️', 'Invalid project file. Please select a valid TrackTap JSON.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+ 
+function showSettings() { document.getElementById('settings-modal').classList.add('open'); document.getElementById('auto-assign-toggle').checked = settings.autoAssign; document.getElementById('sound-toggle').checked = settings.sound; }
+function hideSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function updateSettings() { settings.autoAssign = document.getElementById('auto-assign-toggle').checked; settings.sound = document.getElementById('sound-toggle').checked; saveToStorage(); }
+ 
+function showToast(icon, msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span class="toast-icon">${icon}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 320); }, 2200);
+}
+ 
+document.addEventListener('keydown', e => {
+  if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+  const vis = !document.getElementById('timer-section').classList.contains('hidden');
+  if (e.key.toLowerCase() === 't' && vis) { e.preventDefault(); tapFinish(null); }
+  if (e.key.toLowerCase() === 's' && vis) { e.preventDefault(); isRunning ? stopTimer() : startTimer(); }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+ 
+window.onload = () => {
+  loadFromStorage(); loadMeetName();
+  renderAthletesTable(); renderHeatsGrid(); renderResults();
+  if (!athletes.length) setTimeout(() => showToast('👋', 'Try "Load Demo" to get started'), 1000);
+};
+</script>
+</body>
+</html>
