@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,9 +65,9 @@
 
   .btn-ghost {
     height:32px;padding:0 14px;
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(201,168,76,0.3);
-    border-radius:20px;font-family:inherit;font-size:13px;font-weight:500;color:#E8EAF0;
+    background:rgba(255,255,255,0.9);
+    border:1px solid rgba(201,168,76,0.5);
+    border-radius:20px;font-family:inherit;font-size:13px;font-weight:600;color:#111B30;
     cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;
   }
   .btn-ghost:hover{background:rgba(201,168,76,0.15);border-color:rgba(201,168,76,0.5);} .btn-ghost:active{transform:scale(0.97)}
@@ -996,51 +997,6 @@ function renderAthletesTable(){
   tbody.innerHTML=athletes.map(a=>`<tr><td style="font-size:13px;font-weight:500;color:var(--text2);">${a.heat}</td><td style="text-align:center;"><span class="lane-num">${a.lane}</span></td><td style="font-weight:600;font-size:14px;">${a.name}</td><td style="font-size:13px;color:var(--text3);">${a.team}</td><td style="text-align:right;"><button class="btn-del" onclick="deleteAthlete('${a.id}')">Remove</button></td></tr>`).join('');
 }
 
-function renderHeatsGrid(){
-  const sec=document.getElementById('heats-section');if(!sec)return;
-  const heats=[...new Set(athletes.map(a=>a.heat))];
-  if(!heats.length){sec.innerHTML=`<div class="card" style="padding:36px;text-align:center;border-style:dashed;"><div class="empty-icon">📋</div><div class="empty-sub">No heats yet — upload a CSV or add athletes manually</div></div>`;return;}
-  const sorted=sortHeats(heats);
-
-  // Group consecutive cards by event class
-  const groups=[];let lastEv=null;
-  sorted.forEach(heat=>{
-    const ev=getEventClass(heat);
-    if(ev!==lastEv){groups.push({evClass:ev,label:EV_GROUP_NAMES[ev]||'Other',heats:[]});lastEv=ev;}
-    groups[groups.length-1].heats.push(heat);
-  });
-
-  sec.innerHTML=groups.map(group=>`
-    <div class="heats-group-label">${group.label}</div>
-    <div class="heats-grid">
-      ${group.heats.map(heat=>{
-        const count=athletes.filter(a=>a.heat===heat).length;
-        const done=!!results[heat];
-        const evClass=getEventClass(heat);
-        const gClass=getGenderClass(heat);
-        const evLabel=getEventLabel(heat);
-        const hAthletes=athletes.filter(a=>a.heat===heat);
-        const grades=[...new Set(hAthletes.map(a=>a.grade).filter(Boolean))];
-        const safeHeat=heat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return `<div class="heat-card ${evClass} ${gClass}" onclick="loadHeat('${safeHeat}')">
-          <div class="gender-bar"></div>
-          <div class="heat-card-body">
-            ${evLabel?`<div class="event-label">${evLabel}</div>`:''}
-            <div class="heat-name">${heat}</div>
-            <div class="heat-footer">
-              <div class="heat-tags">
-                ${genderTag(heat)}
-                ${gradeTag(heat,grades)}
-                <span style="font-size:10px;color:var(--text3);font-weight:500;">${count} athlete${count!==1?'s':''}</span>
-              </div>
-              ${done?`<span class="heat-chip chip-done">Done</span>`:`<span class="heat-chip chip-start">Start</span>`}
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>`).join('');
-}
-
 function renderResults(){
   const c=document.getElementById('results-content'),masterTbody=document.getElementById('all-results-body'),countEl=document.getElementById('total-results-count');
   if(!c)return;const keys=Object.keys(results).sort();
@@ -1096,27 +1052,67 @@ function handleCSVUpload(e){
 }
 
 function parseCSV(text){
-  const lines=text.trim().split(/\r?\n/);if(lines.length<2)return[];
-  const headers=lines[0].toLowerCase().split(',').map(h=>h.trim());
-  return lines.slice(1).filter(l=>l.trim()).map((line,i)=>{
-    const vals=line.split(',').map(v=>v.trim()),row={};
-    headers.forEach((h,idx)=>row[h]=vals[idx]||'');
-    const event=row.event||row['event name']||row.race||'';
-    const heatNum=row.heat||row['heat number']||row['heat #']||'';
-    const grade=row.grade||row['grade level']||row.gr||'';
-    const gender=row.gender||row.sex||'';
-    const lane=parseInt(row.lane||row.ln||'99')||99;
-    const name=row.name||row.athlete||row['athlete name']||'';
-    if(!name)return null;
-    const school=row.school||row.team||row.club||'Unattached';
-    let label=event||'Event';
-    if(event&&heatNum)label=`${event} — Heat ${heatNum}`;
-    else if(heatNum)label=`Heat ${heatNum}`;
-    const parts=[];
-    if(gender)parts.push(gender.charAt(0).toUpperCase()+gender.slice(1).toLowerCase());
-    if(grade)parts.push(`Grade ${grade}`);
-    if(parts.length)label+=` — ${parts.join(' ')}`;
-    return{id:`csv-${Date.now().toString(36)}-${i}`,heat:label,lane,name,team:school,grade,gender};
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+
+  // Proper CSV line parser that handles quoted fields with commas
+  function parseLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  }
+
+  const headers = parseLine(lines[0]).map(h => h.toLowerCase().trim());
+
+  return lines.slice(1).filter(l => l.trim()).map((line, i) => {
+    const vals = parseLine(line);
+    const row = {};
+    headers.forEach((h, idx) => row[h] = vals[idx] || '');
+
+    const event = row.event || row['event name'] || row.race || '';
+    const heatNum = row.heat || row['heat number'] || row['heat #'] || '';
+    const grade = row.grade || row['grade level'] || row.gr || '';
+    const gender = row.gender || row.sex || '';
+    const raceGroup = row.race_group || row.racegroup || row['race group'] || row.group || '';
+    const lane = parseInt(row.lane || row.ln || '99') || 99;
+    const name = row.name || row.athlete || row['athlete name'] || '';
+    if (!name) return null;
+    const school = row.school || row.team || row.club || 'Unattached';
+
+    // FINAL WORKING LOGIC
+    let label = event || 'Event';
+
+    if (raceGroup) {
+      // Combined/mixed heats (800M, 1600M etc.)
+      label = raceGroup;
+    } else {
+      // Normal events - always use old logic (event + Heat + grade + gender)
+      if (event && heatNum) {
+        label = `${event} — Heat ${heatNum}`;
+      } else if (heatNum) {
+        label = `Heat ${heatNum}`;
+      }
+
+      const parts = [];
+      if (gender) parts.push(gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase());
+      if (grade) parts.push(`Grade ${grade}`);
+      if (parts.length) label += ` — ${parts.join(' ')}`;
+    }
+
+    return {id: `csv-${Date.now().toString(36)}-${i}`, heat: label, lane, name, team: school, grade, gender, raceGroup};
   }).filter(Boolean);
 }
 
