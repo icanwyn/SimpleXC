@@ -572,6 +572,26 @@
   </div>
 </div>
 
+<!-- EDIT CONFIRM MODAL -->
+<div id="edit-modal" class="modal-overlay" onclick="if(event.target===this)hideEditModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="hideEditModal()">✕</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="width:36px;height:36px;background:rgba(201,168,76,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">✏️</div>
+      <div class="modal-title" style="margin-bottom:0;">Edit Heat Results</div>
+    </div>
+    <p id="edit-modal-heat-name" style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;"></p>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:20px;line-height:1.6;">All saved finish times will be restored into the timer. You can re-assign athletes, delete a tap, or add new ones. Hit <strong>Save &amp; Next Heat</strong> when done to overwrite.</p>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="confirmEditHeat()" style="background:var(--gold);color:var(--navy);font-weight:700;">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+        Open for Editing
+      </button>
+      <button class="btn-cancel" onclick="hideEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div id="settings-modal" class="modal-overlay" onclick="if(event.target===this)hideSettings()">
   <div class="modal" onclick="event.stopPropagation()">
@@ -1070,7 +1090,7 @@ function renderHeatsGrid(){
 
         // Race group badge in header
         const rgBadge = isRaceGroup ? `<div class="event-label" style="color:#4a3a8a;">Mixed Race</div>` : (evLabel ? `<div class="event-label">${evLabel}</div>` : '');
-        return `<div class="heat-card ${evClass} ${gClass}" onclick="loadHeat('${safeHeat}')"><div class="gender-bar"></div><div class="heat-card-body">${rgBadge}<div class="heat-name">${heat}</div><div class="heat-footer"><div class="heat-tags">${tagsHtml}</div>${done?`<span class="heat-chip chip-done">Done</span>`:`<span class="heat-chip chip-start">Start</span>`}</div></div></div>`;
+        return `<div class="heat-card ${evClass} ${gClass}" onclick="loadHeat('${safeHeat}')"><div class="gender-bar"></div><div class="heat-card-body">${rgBadge}<div class="heat-name">${heat}</div><div class="heat-footer"><div class="heat-tags">${tagsHtml}</div><div style="display:flex;gap:5px;align-items:center;">${done ? `<span class="heat-chip chip-done">Done</span><button onclick="event.stopPropagation();editHeat('${safeHeat}')" style="height:22px;padding:0 8px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.4);border-radius:20px;font-family:inherit;font-size:10px;font-weight:700;color:#7a5a10;cursor:pointer;" title="Edit results">✏️</button>` : `<span class="heat-chip chip-start">Start</span>`}</div></div></div></div>`;
       }).join('')}
     </div>`).join('');
 }
@@ -1104,9 +1124,24 @@ function renderResults(){
 
 function loadHeat(heat){currentHeat=heat;currentAthletes=athletes.filter(a=>a.heat===heat).sort((a,b)=>a.lane-b.lane);recordedFinishes=[];collapsedGroups={};const sec=document.getElementById('timer-section');sec.classList.remove('hidden');document.getElementById('heat-title').textContent=heat;document.getElementById('tap-count').textContent='0';renderAthletesList();renderFinishesList();updateAssignedCount();resetTimer();setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),80);}
 
+let pendingEditHeat = null;
+
 function editHeat(heat) {
   if (!results[heat]) { showToast('⚠️','No saved results for this heat'); return; }
-  if (!confirm(`Re-open "${heat}" for editing?\n\nAll saved finish times will be restored. Hit "Save & Next Heat" when done to overwrite.`)) return;
+  pendingEditHeat = heat;
+  document.getElementById('edit-modal-heat-name').textContent = heat;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function hideEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  pendingEditHeat = null;
+}
+
+function confirmEditHeat() {
+  const heat = pendingEditHeat;
+  hideEditModal();
+  if (!heat || !results[heat]) return;
 
   currentHeat = heat;
   currentAthletes = athletes.filter(a => a.heat === heat).sort((a,b) => a.lane - b.lane);
@@ -1119,20 +1154,18 @@ function editHeat(heat) {
     athleteId: r.athleteId || null,
   }));
 
-  // Stop any running timer first
+  // Stop any running timer
   clearInterval(timerInterval);
   isRunning = false;
 
-  // Set timer to the last recorded finish time
+  // Set timer display to the last recorded finish time
   const lastTime = recordedFinishes.length ? recordedFinishes[recordedFinishes.length - 1].timeMs : 0;
   startTime = 0;
   pausedTime = lastTime;
 
-  // Update display to show last time
   const el = document.getElementById('timer-display');
   if (el) el.textContent = formatTime(lastTime);
 
-  // Reset start button to Resume state since we have a paused time
   const btn = document.getElementById('start-btn');
   if (btn) {
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> Resume`;
@@ -1157,7 +1190,8 @@ function closeTimer(){document.getElementById('timer-section').classList.add('hi
 
 function saveAndClearHeat(){
   if(!currentHeat||!recordedFinishes.length){showToast('⚠️','Record at least one finish time first.');return;}
-  const unassigned=recordedFinishes.filter(f=>!f.athleteId).length;if(unassigned>0&&!confirm(`${unassigned} finish(es) unassigned. Save anyway?`))return;
+  const unassigned=recordedFinishes.filter(f=>!f.athleteId).length;
+  // Don't use confirm() — blocked on HTTPS/Vercel. Just save and note unassigned in toast.
   results[currentHeat]=recordedFinishes.map(f=>{
     const a=f.athleteId?currentAthletes.find(x=>x.id===f.athleteId):null;
     return{
@@ -1166,16 +1200,17 @@ function saveAndClearHeat(){
       name:  a ? a.name  : 'Unassigned',
       team:  a ? a.team  : '',
       lane:  a ? a.lane  : '',
-      // Division metadata — used for per-division scoring on the spectator page
-      // For race_group heats each athlete has their own event/gender/grade
       event:  a ? (a.event  || currentHeat) : currentHeat,
       gender: a ? (a.gender || '')          : '',
       grade:  a ? (a.grade  || '')          : '',
     };
   });
-  saveToStorage();if(results[currentHeat].every(r=>r.name!=='Unassigned')&&results[currentHeat].length>=3)launchConfetti();
-  document.getElementById('timer-section').classList.add('hidden');currentHeat=null;recordedFinishes=[];
-  renderHeatsGrid();renderResults();showToast('✓','Results saved');
+  saveToStorage();
+  if(results[currentHeat].every(r=>r.name!=='Unassigned')&&results[currentHeat].length>=3) launchConfetti();
+  document.getElementById('timer-section').classList.add('hidden');
+  currentHeat=null; recordedFinishes=[];
+  renderHeatsGrid(); renderResults();
+  showToast('✓', unassigned > 0 ? `Saved — ${unassigned} finish${unassigned!==1?'es':''} unassigned` : 'Results saved');
 }
 
 function launchConfetti(){const colors=['#C9A84C','#1B2C52','#E8EAF0','#2E9E58','#8a2565'];for(let i=0;i<50;i++){setTimeout(()=>{const el=document.createElement('div');el.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-10px;width:8px;height:8px;border-radius:${Math.random()>.5?'50%':'2px'};background:${colors[i%colors.length]};z-index:9999;pointer-events:none;transition:transform 1.4s ease,opacity 1.2s ease`;document.body.appendChild(el);setTimeout(()=>{el.style.transform=`translateY(${innerHeight+20}px) rotate(${Math.random()*360}deg)`;el.style.opacity='0';},30);setTimeout(()=>el.remove(),1500);},i*16);}}
@@ -1183,7 +1218,7 @@ function launchConfetti(){const colors=['#C9A84C','#1B2C52','#E8EAF0','#2E9E58',
 function addAthlete(){const heat=document.getElementById('add-heat').value.trim()||'Heat 1';const lane=parseInt(document.getElementById('add-lane').value)||99;const name=document.getElementById('add-name').value.trim();const team=document.getElementById('add-team').value.trim()||'Unattached';if(!name){document.getElementById('add-name').focus();return;}athletes.push({id:'a-'+Date.now().toString(36),heat,lane,name,team});saveToStorage();hideAddModal();renderAthletesTable();renderHeatsGrid();showToast('✓',`Added ${name}`);}
 function showAddModal(){document.getElementById('add-modal').classList.add('open');setTimeout(()=>document.getElementById('add-name').focus(),100);}
 function hideAddModal(){document.getElementById('add-modal').classList.remove('open');}
-function deleteAthlete(id){if(!confirm('Remove this athlete?'))return;athletes=athletes.filter(a=>a.id!==id);saveToStorage();renderAthletesTable();renderHeatsGrid();}
+function deleteAthlete(id){athletes=athletes.filter(a=>a.id!==id);saveToStorage();renderAthletesTable();renderHeatsGrid();showToast('✓','Athlete removed');}
 
 function handleCSVUpload(e){
   const file=e.target.files[0];if(!file)return;
@@ -1253,7 +1288,7 @@ function parseCSV(text){
   }).filter(Boolean);
 }
 
-function clearAllData(){if(!confirm('Delete ALL athletes and results?'))return;athletes=[];results={};localStorage.removeItem('tt_ath_v3');localStorage.removeItem('tt_res_v3');renderAthletesTable();renderHeatsGrid();renderResults();document.getElementById('timer-section').classList.add('hidden');}
+function clearAllData(){athletes=[];results={};localStorage.removeItem('tt_ath_v3');localStorage.removeItem('tt_res_v3');renderAthletesTable();renderHeatsGrid();renderResults();document.getElementById('timer-section').classList.add('hidden');showToast('✓','Roster cleared');}
 function exportAllResults(){if(!Object.keys(results).length){showToast('ℹ️','No results to export');return;}let csv='Heat,Place,Time (s),Athlete,Team,Lane\n';Object.keys(results).sort().forEach(heat=>{results[heat].forEach(r=>{csv+=`"${heat}",${r.place},${(r.timeMs/1000).toFixed(3)},"${r.name}","${r.team}",${r.lane||''}\n`;});});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`tracktap_${new Date().toISOString().slice(0,10)}.csv`;a.click();}
 function saveProject(){const data={athletes,results,meetName:document.getElementById('meet-name').value.trim(),settings,version:'1.0'};const json=JSON.stringify(data,null,2);const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const meet=document.getElementById('meet-name').value.trim().replace(/[^a-z0-9]/gi,'_');a.download=`tracktap_${meet||'project'}_${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);navigator.clipboard.writeText(json).then(()=>showToast('✓','Saved + copied to clipboard')).catch(()=>showToast('✓','Project saved to file'));}
 function loadProject(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){try{const data=JSON.parse(ev.target.result);if(data.athletes&&Array.isArray(data.athletes))athletes=data.athletes;if(data.results&&typeof data.results==='object')results=data.results;if(data.settings)settings={...settings,...data.settings};if(data.meetName){document.getElementById('meet-name').value=data.meetName;localStorage.setItem('tt_meet',data.meetName);}saveToStorage();renderAthletesTable();renderHeatsGrid();renderResults();showToast('✓',`Project loaded: ${athletes.length} athletes`);}catch(err){showToast('⚠️','Invalid project file');}};reader.readAsText(file);e.target.value='';}
