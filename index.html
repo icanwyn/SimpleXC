@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,11 +7,12 @@
 <title>Track Timing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
   :root {
-    /* LUXE palette */
     --navy:       #111B30;
     --navy-mid:   #1B2C52;
     --navy-light: #243660;
@@ -77,88 +77,28 @@
   .section-sub { font-size:14px;color:var(--text3);margin-bottom:20px; }
   .card { background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;box-shadow:0 1px 6px rgba(17,27,48,0.06); }
   .toolbar { display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px; }
-  .btn-primary {
-    height:36px;padding:0 18px;
-    background:var(--navy-mid);
-    border:none;border-radius:20px;
-    font-family:inherit;font-size:14px;font-weight:600;color:#fff;
-    cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;
-  }
+  .btn-primary { height:36px;padding:0 18px;background:var(--navy-mid);border:none;border-radius:20px;font-family:inherit;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px; }
   .btn-primary:hover{background:var(--navy-light)} .btn-primary:active{transform:scale(0.97)}
   .btn-green{background:var(--green)} .btn-green:hover{background:#267a45}
-  /* gold accent button for key actions */
-  .btn-gold{background:var(--gold)!important;color:var(--navy)!important;font-weight:700!important;}
-  .btn-gold:hover{background:var(--gold-light)!important;}
   .upload-btn{position:relative;overflow:hidden}
   .upload-btn input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
 
-  /* ─── EVENT FILTER TABS ─── */
-  .filter-bar {
-    display:flex;align-items:center;gap:6px;margin-bottom:16px;
-    flex-wrap:wrap;
-  }
-  .filter-tab {
-    height:32px;padding:0 14px;
-    background:#fff;border:1px solid var(--border);border-radius:20px;
-    font-family:inherit;font-size:12px;font-weight:600;color:#4a5568;
-    cursor:pointer;transition:all 0.15s;white-space:nowrap;
-  }
+  /* ─── FILTER TABS ─── */
+  .filter-bar { display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap; }
+  .filter-tab { height:32px;padding:0 14px;background:#fff;border:1px solid var(--border);border-radius:20px;font-family:inherit;font-size:12px;font-weight:600;color:#4a5568;cursor:pointer;transition:all 0.15s;white-space:nowrap; }
   .filter-tab:hover { border-color:var(--gold);color:#111B30; }
-  .filter-tab.active {
-    background:var(--navy);color:#fff;border-color:var(--navy);
-    box-shadow:0 2px 8px rgba(17,27,48,0.2);
-  }
-  .filter-tab-count {
-    display:inline-block;background:rgba(255,255,255,0.2);
-    border-radius:10px;padding:0 5px;font-size:10px;margin-left:4px;
-  }
+  .filter-tab.active { background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 2px 8px rgba(17,27,48,0.2); }
+  .filter-tab-count { display:inline-block;background:rgba(255,255,255,0.2);border-radius:10px;padding:0 5px;font-size:10px;margin-left:4px; }
   .filter-tab:not(.active) .filter-tab-count { background:rgba(17,27,48,0.08);color:#4a5568; }
 
-  /* ─── QR CODE SECTION ─── */
-  .qr-panel {
-    background:var(--navy);border:1px solid var(--gold-border);border-radius:var(--radius2);
-    padding:24px;margin-bottom:24px;
-    display:flex;align-items:center;gap:24px;flex-wrap:wrap;
-  }
-  .qr-canvas-wrap {
-    background:#fff;border-radius:10px;padding:12px;flex-shrink:0;
-    box-shadow:0 2px 12px rgba(0,0,0,0.3);
-  }
-  .qr-info { flex:1;min-width:200px; }
-  .qr-title { font-size:16px;font-weight:700;color:#E8EAF0;margin-bottom:4px; }
-  .qr-sub { font-size:13px;color:rgba(232,234,240,0.55);margin-bottom:14px;line-height:1.5; }
-  .qr-url { font-size:11px;color:rgba(201,168,76,0.7);font-family:monospace;word-break:break-all;margin-bottom:14px; }
-  .qr-actions { display:flex;gap:8px;flex-wrap:wrap; }
-  .btn-qr {
-    height:32px;padding:0 14px;border-radius:20px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;border:1px solid;transition:all 0.15s;display:flex;align-items:center;gap:6px;
-  }
-  .btn-qr-gold { background:var(--gold);color:var(--navy);border-color:var(--gold); }
-  .btn-qr-gold:hover { background:var(--gold-light); }
-  .btn-qr-outline { background:transparent;color:#E8EAF0;border-color:rgba(232,234,240,0.3); }
-  .btn-qr-outline:hover { background:rgba(255,255,255,0.08); }
-
   /* ─── HEAT CARDS ─── */
-  .heats-group-label {
-    font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;
-    color:var(--gold);margin:22px 0 8px 2px;
-    display:flex;align-items:center;gap:8px;
-  }
+  .heats-group-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--gold);margin:22px 0 8px 2px;display:flex;align-items:center;gap:8px; }
   .heats-group-label::after { content:'';flex:1;height:1px;background:var(--gold-border); }
   .heats-group-label:first-child{margin-top:0}
   .heats-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:10px;margin-bottom:4px; }
-
-  .heat-card {
-    border-radius:var(--radius2);cursor:pointer;
-    transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1);
-    position:relative;overflow:hidden;
-    border:1px solid var(--border);
-    box-shadow:0 1px 4px rgba(17,27,48,0.07);
-    border-left-width:3px !important;
-  }
+  .heat-card { border-radius:var(--radius2);cursor:pointer;transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden;border:1px solid var(--border);box-shadow:0 1px 4px rgba(17,27,48,0.07);border-left-width:3px !important; }
   .heat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(17,27,48,0.13);border-color:var(--gold-border);}
   .heat-card:active{transform:scale(0.97)}
-
-  /* Event left border — navy/gold family tones */
   .ev-sprint { background:#fff; border-color:#1B2C52; }
   .ev-mid    { background:#fff; border-color:#1a6b58; }
   .ev-long   { background:#fff; border-color:#4a3a8a; }
@@ -166,14 +106,11 @@
   .ev-relay  { background:#fff; border-color:#1a5a7a; }
   .ev-field  { background:#fff; border-color:#7a3a6a; }
   .ev-other  { background:#fff; border-color:#4a5568; }
-
-  /* Gender top bar */
   .gender-bar { height:3px;width:100%; }
   .g-boys .gender-bar    { background:var(--navy-mid); }
   .g-girls .gender-bar   { background:#8a2565; }
   .g-mixed .gender-bar   { background:#4a3a8a; }
   .g-unknown .gender-bar { background:var(--silver); }
-
   .heat-card-body { padding:12px 13px 11px; background:#fff; }
   .event-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px;color:#7a5a10; }
   .heat-name { font-size:13px;font-weight:700;color:#111B30;line-height:1.3;margin-bottom:9px; }
@@ -183,10 +120,7 @@
   .htag-boys  { background:rgba(27,44,82,0.08);  color:#1B2C52; border-color:rgba(27,44,82,0.22); }
   .htag-girls { background:rgba(138,37,101,0.09); color:#7a2055; border-color:rgba(138,37,101,0.22); }
   .htag-mixed { background:rgba(74,58,138,0.09);  color:#3d2a80; border-color:rgba(74,58,138,0.22); }
-  .htag-fr { background:rgba(201,168,76,0.12); color:#6b4c0e; border-color:rgba(201,168,76,0.35); }
-  .htag-so { background:rgba(201,168,76,0.12); color:#6b4c0e; border-color:rgba(201,168,76,0.35); }
-  .htag-jr { background:rgba(201,168,76,0.12); color:#6b4c0e; border-color:rgba(201,168,76,0.35); }
-  .htag-sr { background:rgba(201,168,76,0.12); color:#6b4c0e; border-color:rgba(201,168,76,0.35); }
+  .htag-fr,.htag-so,.htag-jr,.htag-sr { background:rgba(201,168,76,0.12); color:#6b4c0e; border-color:rgba(201,168,76,0.35); }
   .htag-gr { background:rgba(27,44,82,0.06); color:#4a5568; border-color:rgba(27,44,82,0.15); }
   .heat-chip { font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px; }
   .chip-start { background:rgba(27,44,82,0.08);color:#1B2C52;border:1px solid rgba(27,44,82,0.2); }
@@ -194,18 +128,17 @@
   .heat-count-text { font-size:10px;color:#5a6a88;font-weight:500; }
 
   /* ─── TABLE ─── */
-  .table-header { padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border2); background:#FAFBFC; }
+  .table-header { padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border2);background:#FAFBFC; }
   .table-header-left { display:flex;align-items:center;gap:10px; }
   .table-header .title{font-size:15px;font-weight:600;color:var(--navy)}
   .count-pill{background:var(--silver-light);color:var(--text3);font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px}
   table{width:100%;border-collapse:collapse;font-size:13px}
   thead th{padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.6px;text-transform:uppercase;border-bottom:1px solid var(--border2);background:#FAFBFC}
   tbody tr{border-bottom:1px solid var(--border2);transition:background 0.1s} tbody tr:last-child{border-bottom:none} tbody tr:hover{background:rgba(201,168,76,0.04)}
-  tbody td{padding:12px 20px;color:var(--text2)}
+  tbody td{padding:12px 20px;color:#243660}
   .lane-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--silver-light);border-radius:6px;font-size:12px;font-weight:700;color:var(--navy)}
   .btn-del{background:none;border:none;cursor:pointer;font-size:12px;color:var(--red);font-family:inherit;padding:4px 10px;border-radius:8px;transition:background 0.1s}
   .btn-del:hover{background:var(--red-bg)}
-
   .empty-state{text-align:center;padding:48px 20px}
   .empty-icon{font-size:36px;margin-bottom:12px;opacity:0.3}
   .empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:4px}
@@ -217,7 +150,7 @@
   .timer-heat-name{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:var(--navy)}
   .timer-heat-sub{font-size:13px;color:var(--text3);margin-top:2px}
   .timer-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .btn-save{height:36px;padding:0 20px;background:var(--navy);color:#fff;border:none;border-radius:20px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;border:1px solid var(--gold-border);}
+  .btn-save{height:36px;padding:0 20px;background:var(--navy);color:#fff;border:1px solid var(--gold-border);border-radius:20px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
   .btn-save:hover{background:var(--navy-light)} .btn-save:active{transform:scale(0.97)}
   .timer-grid{display:grid;grid-template-columns:240px 1fr 320px;gap:16px;align-items:start}
   @media(max-width:900px){.timer-grid{grid-template-columns:1fr}}
@@ -274,9 +207,67 @@
   .finish-name{font-size:13px;font-weight:600;color:var(--navy);background:var(--green-bg);border:1px solid var(--green-border);border-radius:10px;padding:7px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
   .btn-unassign{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all 0.1s;flex-shrink:0}
   .btn-unassign:hover{background:var(--red-bg);color:var(--red)}
+
+  /* ─── RESULTS ─── */
   #results-section{margin-top:36px}
   .result-heat{margin-bottom:20px}
   .result-heat-title{font-size:17px;font-weight:700;letter-spacing:-0.3px;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+
+  /* ─── QR PANEL ─── */
+  .qr-panel {
+    background:var(--navy);border:1px solid var(--gold-border);border-radius:var(--radius2);
+    padding:24px;margin-bottom:28px;
+    display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;
+  }
+  .qr-canvas-wrap {
+    background:#fff;border-radius:12px;padding:10px;flex-shrink:0;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    display:flex;align-items:center;justify-content:center;
+    width:170px;height:170px;
+  }
+  #qr-code-container { width:150px;height:150px;position:relative;overflow:hidden; }
+  #qr-code-container > div { position:absolute;top:0;left:0; }
+  #qr-code-container canvas { display:block!important;border-radius:4px; }
+  #qr-code-container img { display:none!important; }
+  .qr-info { flex:1;min-width:220px; }
+  .qr-title { font-size:17px;font-weight:700;color:#E8EAF0;margin-bottom:6px;letter-spacing:-0.3px; }
+  .qr-sub { font-size:13px;color:rgba(232,234,240,0.55);margin-bottom:16px;line-height:1.6; }
+  .qr-status { display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(201,168,76,0.8);margin-bottom:16px; }
+  .qr-dot { width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0; }
+  .qr-actions { display:flex;gap:8px;flex-wrap:wrap; }
+  .btn-qr { height:34px;padding:0 16px;border-radius:20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border:1px solid;transition:all 0.15s;display:flex;align-items:center;gap:6px; }
+  .btn-qr-gold { background:var(--gold);color:var(--navy);border-color:var(--gold); }
+  .btn-qr-gold:hover { background:var(--gold-light); }
+  .btn-qr-outline { background:transparent;color:#E8EAF0;border-color:rgba(232,234,240,0.25); }
+  .btn-qr-outline:hover { background:rgba(255,255,255,0.08);border-color:rgba(201,168,76,0.4); }
+
+  /* ─── EVENT WINNERS PODIUM ─── */
+  .winners-section { margin-bottom:32px; }
+  .winners-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px; }
+  .winner-card {
+    background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+    overflow:hidden;box-shadow:0 1px 6px rgba(17,27,48,0.06);
+  }
+  .winner-card-header {
+    background:#F4F6FA;padding:12px 16px;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;
+  }
+  .winner-event-name { font-size:16px;font-weight:800;color:#111B30;letter-spacing:-0.3px; }
+  .winner-heat-count { font-size:11px;color:#5a6a88;font-weight:600; }
+  .winner-row {
+    display:flex;align-items:center;gap:12px;padding:11px 16px;
+    border-bottom:1px solid var(--border2);
+  }
+  .winner-row:last-child { border-bottom:none; }
+  .winner-medal { font-size:22px;width:32px;text-align:center;flex-shrink:0; }
+  .winner-info { flex:1;min-width:0; }
+  .winner-name { font-size:14px;font-weight:700;color:#111B30; }
+  .winner-meta { font-size:11px;color:#5a6a88;margin-top:1px; }
+  .winner-time { font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0; }
+  .winner-time-gold   { color:#7a5a10; }
+  .winner-time-silver { color:#3a4a68; }
+  .winner-time-bronze { color:#7a4010; }
 
   /* ─── MODALS ─── */
   .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(11,17,30,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center}
@@ -310,6 +301,7 @@
   @media(max-width:640px){
     header{padding:0 16px} main{padding:20px 16px 48px}
     .header-meet{display:none} #timer-display{font-size:52px}
+    .qr-panel{flex-direction:column}
   }
 </style>
 </head>
@@ -340,6 +332,7 @@
 </header>
 
 <main>
+  <!-- MANAGE -->
   <div id="manage-section">
     <div class="section-title">Athletes &amp; Heats</div>
     <div class="section-sub">Upload your CSV — heats sort automatically by event, then gender, then grade</div>
@@ -370,10 +363,8 @@
       </button>
     </div>
 
-    <!-- Event filter tabs -->
     <div class="filter-bar" id="event-filter-bar">
       <button class="filter-tab active" onclick="setEventFilter('all',this)">All Events</button>
-      <!-- tabs injected by JS after CSV load -->
     </div>
 
     <div id="heats-section"></div>
@@ -466,46 +457,73 @@
   <!-- RESULTS -->
   <div id="results-section" class="spacer">
     <div class="divider"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-      <div><div class="section-title">Meet Results</div><div class="section-sub">All recorded athletes • Official times &amp; placements</div></div>
-      <button class="btn-primary" onclick="exportAllResults()" style="height:36px;padding:0 16px;font-size:13px;">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 1v9M4 7l4 4 4-4M2 13h12"/></svg>Export CSV
-      </button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="section-title">Meet Results</div>
+        <div class="section-sub">Official times, event winners &amp; placements across all heats</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="openSpectatorPage()" style="background:var(--gold);color:var(--navy);font-weight:700;">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-4M10 1h5v5M14 2L8 8"/></svg>
+          Spectator Page
+        </button>
+        <button class="btn-primary" onclick="exportAllResults()">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 1v9M4 7l4 4 4-4M2 13h12"/></svg>
+          Export CSV
+        </button>
+      </div>
     </div>
 
-    <!-- QR CODE PANEL -->
-    <div class="qr-panel" id="qr-panel">
+    <!-- QR PANEL -->
+    <div class="qr-panel">
       <div class="qr-canvas-wrap">
-        <canvas id="qr-canvas" width="140" height="140"></canvas>
+        <div id="qr-code-container"></div>
       </div>
       <div class="qr-info">
-        <div class="qr-title">Share Results with Spectators</div>
-        <div class="qr-sub">Scan this QR code to open a live results page on any phone. Updates automatically as you record times.</div>
-        <div class="qr-url" id="qr-url-text">Generating link…</div>
+        <div class="qr-title">📱 Share with Spectators</div>
+        <div class="qr-sub">Scan this QR code to open the live results page on any phone or tablet. Regenerates each time you save a heat.</div>
+        <div class="qr-status"><span class="qr-dot"></span><span id="qr-status-text">Save a heat to generate the QR code</span></div>
         <div class="qr-actions">
-          <button class="btn-qr btn-qr-gold" onclick="downloadQR()">
+          <button class="btn-qr btn-qr-gold" onclick="openSpectatorPage()">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-4M10 1h5v5M14 2L8 8"/></svg>
+            Open Results Page
+          </button>
+          <button class="btn-qr btn-qr-outline" onclick="downloadQR()">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 1v9M4 7l4 4 4-4M2 13h12"/></svg>
             Download QR
-          </button>
-          <button class="btn-qr btn-qr-outline" onclick="copyResultsLink()">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/></svg>
-            Copy Link
-          </button>
-          <button class="btn-qr btn-qr-outline" onclick="openSpectatorPage()">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-4M10 1h5v5M14 2L8 8"/></svg>
-            Open Page
           </button>
         </div>
       </div>
     </div>
 
+    <!-- EVENT WINNERS -->
+    <div class="winners-section" id="event-winners-section" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div class="section-title" style="margin-bottom:0;font-size:19px;">🏆 Event Winners</div>
+        <span style="font-size:13px;color:var(--text3);">Top 3 across all heats per event</span>
+      </div>
+      <div class="winners-grid" id="winners-grid"></div>
+    </div>
+
+    <div class="divider" style="margin:20px 0;"></div>
+
+    <!-- ALL RESULTS TABLE -->
     <div class="card" style="margin-bottom:24px;">
-      <div class="table-header"><div class="table-header-left"><span class="title">All Recorded Athletes</span><span id="total-results-count" class="count-pill">0</span></div></div>
+      <div class="table-header">
+        <div class="table-header-left">
+          <span class="title">All Recorded Athletes</span>
+          <span id="total-results-count" class="count-pill">0</span>
+        </div>
+      </div>
       <div style="overflow-x:auto;max-height:420px;">
-        <table><thead><tr><th>Heat / Event</th><th style="width:60px;text-align:center;">Place</th><th>Time</th><th>Athlete</th><th>Team</th><th style="width:70px;text-align:center;">Lane</th></tr></thead><tbody id="all-results-body"></tbody></table>
+        <table>
+          <thead><tr><th>Heat / Event</th><th style="width:60px;text-align:center;">Place</th><th>Time</th><th>Athlete</th><th>Team</th><th style="width:70px;text-align:center;">Lane</th></tr></thead>
+          <tbody id="all-results-body"></tbody>
+        </table>
       </div>
     </div>
-    <div class="section-title" style="font-size:17px;margin-top:8px;">Results by Heat</div>
+
+    <div class="section-title" style="font-size:17px;margin-bottom:12px;">Results by Heat</div>
     <div id="results-content"></div>
   </div>
 </main>
@@ -577,340 +595,369 @@
 // ════════════════════════════════════════════
 // HEAT CARD COLOR & SORT LOGIC
 // ════════════════════════════════════════════
+function getEventClass(h){const s=(h||'').toLowerCase();if(/\brelay\b/.test(s))return'ev-relay';if(/hurdle/.test(s))return'ev-hurdle';if(/\b(55m|60m|100m|200m|dash)\b/.test(s))return'ev-sprint';if(/\b(300m|400m|800m)\b/.test(s))return'ev-mid';if(/\b(1500m|1600m|mile|3000m|3200m|5000m|10000m)\b|cross/.test(s))return'ev-long';if(/jump|vault|throw|shot|discus|javelin|hammer|pole/.test(s))return'ev-field';return'ev-other';}
+function getGenderClass(h){const s=(h||'').toLowerCase();if(/\b(boys|male|men)\b/.test(s))return'g-boys';if(/\b(girls|female|women)\b/.test(s))return'g-girls';if(/mixed/.test(s))return'g-mixed';return'g-unknown';}
+function getEventLabel(h){const s=(h||'').toLowerCase();if(/\brelay\b/.test(s))return'Relay';if(/hurdle/.test(s))return'Hurdles';const m=s.match(/\b(\d+m)\b/);if(m)return m[1].toUpperCase();if(/mile/.test(s))return'Mile';if(/cross/.test(s))return'XC';if(/shot/.test(s))return'Shot Put';if(/discus/.test(s))return'Discus';if(/javelin/.test(s))return'Javelin';if(/hammer/.test(s))return'Hammer';if(/pole/.test(s))return'Pole Vault';if(/high jump/.test(s))return'High Jump';if(/long jump/.test(s))return'Long Jump';if(/triple/.test(s))return'Triple Jump';return'';}
+function gradeTag(h,g){const m=(h||'').match(/grade\s*(\d+)/i);const gr=m?m[1]:(g&&g.length===1?g[0]:null);if(!gr)return'';const map={'9':['htag-fr','Fr'],'10':['htag-so','So'],'11':['htag-jr','Jr'],'12':['htag-sr','Sr']};const[cls,label]=map[gr]||['htag-gr','Gr'+gr];return`<span class="htag ${cls}">${label}</span>`;}
+function genderTag(h){const s=(h||'').toLowerCase();if(/\b(boys|male)\b/.test(s))return`<span class="htag htag-boys">Boys</span>`;if(/\b(girls|female)\b/.test(s))return`<span class="htag htag-girls">Girls</span>`;if(/mixed/.test(s))return`<span class="htag htag-mixed">Mixed</span>`;return'';}
 
-function getEventClass(h) {
-  const s = (h||'').toLowerCase();
-  if (/\brelay\b/.test(s))                                             return 'ev-relay';
-  if (/hurdle/.test(s))                                                return 'ev-hurdle';
-  if (/\b(55m|60m|100m|200m|dash)\b/.test(s))                         return 'ev-sprint';
-  if (/\b(300m|400m|800m)\b/.test(s))                                  return 'ev-mid';
-  if (/\b(1500m|1600m|mile|3000m|3200m|5000m|10000m)\b|cross/.test(s)) return 'ev-long';
-  if (/jump|vault|throw|shot|discus|javelin|hammer|pole/.test(s))      return 'ev-field';
-  return 'ev-other';
-}
-
-function getGenderClass(h) {
-  const s = (h||'').toLowerCase();
-  if (/\b(boys|male|men)\b/.test(s))          return 'g-boys';
-  if (/\b(girls|female|women)\b/.test(s))     return 'g-girls';
-  if (/mixed/.test(s))                         return 'g-mixed';
-  return 'g-unknown';
-}
-
-function getEventLabel(h) {
-  const s = (h||'').toLowerCase();
-  if (/\brelay\b/.test(s))   return 'Relay';
-  if (/hurdle/.test(s))      return 'Hurdles';
-  const m = s.match(/\b(\d+m)\b/); if (m) return m[1].toUpperCase();
-  if (/mile/.test(s))        return 'Mile';
-  if (/cross/.test(s))       return 'XC';
-  if (/shot/.test(s))        return 'Shot Put';
-  if (/discus/.test(s))      return 'Discus';
-  if (/javelin/.test(s))     return 'Javelin';
-  if (/hammer/.test(s))      return 'Hammer';
-  if (/pole/.test(s))        return 'Pole Vault';
-  if (/high jump/.test(s))   return 'High Jump';
-  if (/long jump/.test(s))   return 'Long Jump';
-  if (/triple/.test(s))      return 'Triple Jump';
-  return '';
-}
-
-function gradeTag(h, athleteGrades) {
-  const m = (h||'').match(/grade\s*(\d+)/i);
-  const gr = m ? m[1] : (athleteGrades && athleteGrades.length === 1 ? athleteGrades[0] : null);
-  if (!gr) return '';
-  const map = {'9':['htag-fr','Fr'],'10':['htag-so','So'],'11':['htag-jr','Jr'],'12':['htag-sr','Sr']};
-  const [cls,label] = map[gr] || ['htag-gr','Gr'+gr];
-  return `<span class="htag ${cls}">${label}</span>`;
-}
-
-function genderTag(h) {
-  const s = (h||'').toLowerCase();
-  if (/\b(boys|male)\b/.test(s))    return `<span class="htag htag-boys">Boys</span>`;
-  if (/\b(girls|female)\b/.test(s)) return `<span class="htag htag-girls">Girls</span>`;
-  if (/mixed/.test(s))               return `<span class="htag htag-mixed">Mixed</span>`;
-  return '';
-}
-
-const EV_ORDER = {'ev-sprint':0,'ev-hurdle':1,'ev-relay':2,'ev-mid':3,'ev-long':4,'ev-field':5,'ev-other':6};
-function evDistKey(h) {
-  const s=(h||'').toLowerCase();
-  const seqs=['55m','60m','100m','200m','300m','400m','800m','1500m','1600m','mile','3000m','3200m','5000m','10000m','hurdle','relay','shot','discus','javelin','hammer','pole','high jump','long jump','triple'];
-  for(let i=0;i<seqs.length;i++) if(s.includes(seqs[i])) return i;
-  return 99;
-}
+const EV_ORDER={'ev-sprint':0,'ev-hurdle':1,'ev-relay':2,'ev-mid':3,'ev-long':4,'ev-field':5,'ev-other':6};
+function evDistKey(h){const s=(h||'').toLowerCase();const seqs=['55m','60m','100m','200m','300m','400m','800m','1500m','1600m','mile','3000m','3200m','5000m','10000m','hurdle','relay','shot','discus','javelin','hammer','pole','high jump','long jump','triple'];for(let i=0;i<seqs.length;i++)if(s.includes(seqs[i]))return i;return 99;}
 function genderKey(h){const s=(h||'').toLowerCase();if(/\b(boys|male)\b/.test(s))return 0;if(/\b(girls|female)\b/.test(s))return 1;return 2;}
 function gradeKey(h){const m=(h||'').match(/grade\s*(\d+)/i);return m?parseInt(m[1]):99;}
 function heatNumKey(h){const m=(h||'').match(/heat\s*(\d+)/i);return m?parseInt(m[1]):99;}
-
-function sortHeats(heats) {
-  return [...heats].sort((a,b)=>{
-    const eA=EV_ORDER[getEventClass(a)], eB=EV_ORDER[getEventClass(b)];
-    if(eA!==eB) return eA-eB;
-    const dA=evDistKey(a), dB=evDistKey(b);
-    if(dA!==dB) return dA-dB;
-    const gA=genderKey(a), gB=genderKey(b);
-    if(gA!==gB) return gA-gB;
-    const grA=gradeKey(a), grB=gradeKey(b);
-    if(grA!==grB) return grA-grB;
-    return heatNumKey(a)-heatNumKey(b);
-  });
-}
-
-const EV_GROUP_NAMES = {
-  'ev-sprint':'🏃 Sprints','ev-hurdle':'🚧 Hurdles','ev-relay':'🔄 Relays',
-  'ev-mid':'⚡ Middle Distance','ev-long':'🏅 Distance','ev-field':'🎯 Field Events','ev-other':'📋 Other Events'
-};
+function sortHeats(heats){return[...heats].sort((a,b)=>{const eA=EV_ORDER[getEventClass(a)],eB=EV_ORDER[getEventClass(b)];if(eA!==eB)return eA-eB;const dA=evDistKey(a),dB=evDistKey(b);if(dA!==dB)return dA-dB;const gA=genderKey(a),gB=genderKey(b);if(gA!==gB)return gA-gB;const grA=gradeKey(a),grB=gradeKey(b);if(grA!==grB)return grA-grB;return heatNumKey(a)-heatNumKey(b);});}
+const EV_GROUP_NAMES={'ev-sprint':'🏃 Sprints','ev-hurdle':'🚧 Hurdles','ev-relay':'🔄 Relays','ev-mid':'⚡ Middle Distance','ev-long':'🏅 Distance','ev-field':'🎯 Field Events','ev-other':'📋 Other Events'};
 
 // ════════════════════════════════════════════
-// EVENT FILTER
+// DIVISION WINNERS — scored by event + gender + grade
+// Works for both normal heats AND race_group mixed heats.
+// Each result record stores its own event/gender/grade metadata.
 // ════════════════════════════════════════════
-let activeEventFilter = 'all';
 
-function getEventFilterKey(h) {
-  // Returns a clean short label used both for tab text and filtering
-  const s = (h||'').toLowerCase();
-  if (/\brelay\b/.test(s))    return 'Relay';
-  if (/hurdle/.test(s))       return 'Hurdles';
-  const m = s.match(/\b(\d+m)\b/); if (m) return m[1].toUpperCase();
-  if (/mile/.test(s))         return 'Mile';
-  if (/cross/.test(s))        return 'Cross Country';
-  if (/shot/.test(s))         return 'Shot Put';
-  if (/discus/.test(s))       return 'Discus';
-  if (/javelin/.test(s))      return 'Javelin';
-  if (/hammer/.test(s))       return 'Hammer';
-  if (/pole/.test(s))         return 'Pole Vault';
-  if (/high jump/.test(s))    return 'High Jump';
-  if (/long jump/.test(s))    return 'Long Jump';
-  if (/triple/.test(s))       return 'Triple Jump';
-  return 'Other';
+function buildDivisionMap() {
+  // Returns: { divKey: { event, gender, grade, athletes:[...] } }
+  const divMap = {};
+  const distOrder = ['55M','60M','100M','200M','300M','400M','800M','1500M','1600M','Mile','3000M','3200M','5000M','10000M','Cross Country','Hurdles','Relay','Shot Put','Discus','Javelin','Hammer','Pole Vault','High Jump','Long Jump','Triple Jump'];
+
+  Object.keys(results).forEach(heatName => {
+    results[heatName].forEach(r => {
+      if (!r.name || r.name === 'Unassigned' || !r.timeMs || r.timeMs <= 0) return;
+
+      // Use stored metadata; fall back to parsing the heat name
+      const event  = r.event  || getEventKey(heatName);
+      let   gender = r.gender || '';
+      if (!gender) {
+        const hs = heatName.toLowerCase();
+        if      (/\b(boys|male)\b/.test(hs))   gender = 'Boys';
+        else if (/\b(girls|female)\b/.test(hs)) gender = 'Girls';
+        else if (/mixed/.test(hs))              gender = 'Mixed';
+        else                                    gender = 'Open';
+      }
+      const grade      = r.grade || '';
+      const gradeLabel = grade ? `Grade ${grade}` : 'Open';
+      const divKey     = `${event}||${gender}||${gradeLabel}`;
+
+      if (!divMap[divKey]) {
+        divMap[divKey] = {
+          event, gender, grade: gradeLabel,
+          gradeNum: parseInt(grade) || 99,
+          evIdx: distOrder.indexOf(event) >= 0 ? distOrder.indexOf(event) : 999,
+          athletes: []
+        };
+      }
+      divMap[divKey].athletes.push({ ...r, heatName });
+    });
+  });
+
+  // Sort and take top 3 per division
+  Object.values(divMap).forEach(div => {
+    div.top3 = [...div.athletes]
+      .sort((a,b) => a.timeMs - b.timeMs)
+      .slice(0, 3);
+  });
+
+  return divMap;
 }
 
-function setEventFilter(key, btn) {
-  activeEventFilter = key;
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  renderHeatsGrid();
-}
+function renderEventWinners() {
+  const section = document.getElementById('event-winners-section');
+  const grid    = document.getElementById('winners-grid');
+  if (!section || !grid) return;
 
-function buildFilterTabs(heats) {
-  const bar = document.getElementById('event-filter-bar');
-  if (!bar) return;
-  // Count heats per event key
-  const counts = {};
-  heats.forEach(h => {
-    const k = getEventFilterKey(h);
-    counts[k] = (counts[k]||0) + 1;
-  });
-  // Sort by event distance order
-  const order = ['55M','60M','100M','200M','300M','400M','800M','1500M','1600M','Mile','3000M','3200M','5000M','10000M','Cross Country','Hurdles','Relay','Shot Put','Discus','Javelin','Hammer','Pole Vault','High Jump','Long Jump','Triple Jump','Other'];
-  const keys = Object.keys(counts).sort((a,b) => {
-    const ia = order.indexOf(a), ib = order.indexOf(b);
-    return (ia<0?999:ia) - (ib<0?999:ib);
-  });
-  const total = heats.length;
-  let html = `<button class="filter-tab ${activeEventFilter==='all'?'active':''}" onclick="setEventFilter('all',this)">All Events<span class="filter-tab-count">${total}</span></button>`;
-  keys.forEach(k => {
-    const active = activeEventFilter===k ? 'active' : '';
-    html += `<button class="filter-tab ${active}" onclick="setEventFilter('${k.replace(/'/g,"\\'")}',this)">${k}<span class="filter-tab-count">${counts[k]}</span></button>`;
-  });
-  bar.innerHTML = html;
-}
+  if (!Object.keys(results).length) { section.style.display = 'none'; return; }
 
-function renderHeatsGrid(){
-  const sec=document.getElementById('heats-section');if(!sec)return;
-  const allHeats=[...new Set(athletes.map(a=>a.heat))];
-  if(!allHeats.length){
-    sec.innerHTML=`<div class="card" style="padding:36px;text-align:center;border-style:dashed;"><div class="empty-icon">📋</div><div class="empty-sub">No heats yet — upload a CSV or add athletes manually</div></div>`;
-    document.getElementById('event-filter-bar').innerHTML=`<button class="filter-tab active" onclick="setEventFilter('all',this)">All Events</button>`;
-    return;
-  }
-  buildFilterTabs(allHeats);
+  const divMap = buildDivisionMap();
+  const divs   = Object.values(divMap).filter(d => d.top3.length > 0);
+  if (!divs.length) { section.style.display = 'none'; return; }
 
-  // Apply filter
-  const filtered = activeEventFilter==='all' ? allHeats : allHeats.filter(h => getEventFilterKey(h)===activeEventFilter);
-  const sorted=sortHeats(filtered);
-
-  if(!sorted.length){
-    sec.innerHTML=`<div class="card" style="padding:28px;text-align:center;"><div class="empty-sub">No heats match this filter</div></div>`;
-    return;
-  }
-
-  // Group by event class for section headings
-  const groups=[];let lastEv=null;
-  sorted.forEach(heat=>{
-    const ev=getEventClass(heat);
-    if(ev!==lastEv){groups.push({evClass:ev,label:EV_GROUP_NAMES[ev]||'Other',heats:[]});lastEv=ev;}
-    groups[groups.length-1].heats.push(heat);
+  // Sort: event order → gender (Boys→Girls→Mixed→Open) → grade number
+  const genderOrder = { Boys:0, Girls:1, Mixed:2, Open:3 };
+  divs.sort((a,b) => {
+    if (a.evIdx !== b.evIdx)   return a.evIdx   - b.evIdx;
+    const ga = genderOrder[a.gender] ?? 9, gb = genderOrder[b.gender] ?? 9;
+    if (ga !== gb)             return ga - gb;
+    return a.gradeNum - b.gradeNum;
   });
 
-  sec.innerHTML=groups.map(group=>`
-    <div class="heats-group-label">${group.label}</div>
-    <div class="heats-grid">
-      ${group.heats.map(heat=>{
-        const count=athletes.filter(a=>a.heat===heat).length;
-        const done=!!results[heat];
-        const evClass=getEventClass(heat);
-        const gClass=getGenderClass(heat);
-        const evLabel=getEventLabel(heat);
-        const hAthletes=athletes.filter(a=>a.heat===heat);
-        const grades=[...new Set(hAthletes.map(a=>a.grade).filter(Boolean))];
-        const safeHeat=heat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return `<div class="heat-card ${evClass} ${gClass}" onclick="loadHeat('${safeHeat}')">
-          <div class="gender-bar"></div>
-          <div class="heat-card-body">
-            ${evLabel?`<div class="event-label">${evLabel}</div>`:''}
-            <div class="heat-name">${heat}</div>
-            <div class="heat-footer">
-              <div class="heat-tags">
-                ${genderTag(heat)}
-                ${gradeTag(heat,grades)}
-                <span class="heat-count-text">${count} athlete${count!==1?'s':''}</span>
-              </div>
-              ${done?`<span class="heat-chip chip-done">Done</span>`:`<span class="heat-chip chip-start">Start</span>`}
+  const medals     = ['🥇','🥈','🥉'];
+  const timeColors = ['#7a5a10','#4a5568','#7a4010'];
+  const genderColors = { Boys:'#1B2C52', Girls:'#8a2565', Mixed:'#4a3a8a', Open:'#4a5568' };
+
+  grid.innerHTML = divs.map(div => {
+    const gc = genderColors[div.gender] || '#4a5568';
+    const heatCount = [...new Set(div.top3.map(r => r.heatName))].length;
+
+    const rows = div.top3.map((r,i) => `
+      <div class="winner-row">
+        <div class="winner-medal">${medals[i]}</div>
+        <div class="winner-info">
+          <div class="winner-name">${r.name}</div>
+          <div class="winner-meta">${r.team||''}${r.team ? ' · ' : ''}${r.heatName}</div>
+        </div>
+        <div class="winner-time" style="color:${timeColors[i]}">${r.time}</div>
+      </div>`).join('');
+
+    return `
+      <div class="winner-card">
+        <div class="winner-card-header" style="border-left:4px solid ${gc};">
+          <div>
+            <div class="winner-event-name">${div.event}</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap;">
+              <span style="font-size:11px;font-weight:700;color:${gc};">${div.gender}</span>
+              <span style="font-size:11px;color:#5a6a88;font-weight:600;">·</span>
+              <span class="winner-heat-count">${div.grade}</span>
+              <span style="font-size:11px;color:#5a6a88;font-weight:600;">·</span>
+              <span class="winner-heat-count">${heatCount} heat${heatCount!==1?'s':''}</span>
             </div>
           </div>
-        </div>`;
-      }).join('')}
-    </div>`).join('');
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  section.style.display = '';
 }
 
 // ════════════════════════════════════════════
-// QR CODE GENERATOR (pure canvas, no library)
+// QR CODE — blob URL approach
 // ════════════════════════════════════════════
-function buildResultsDataURL() {
-  // Encode current results as a data: URL for the spectator page
-  const meetName = document.getElementById('meet-name')?.value || 'Track Meet';
-  const payload = { meetName, results, ts: Date.now() };
-  const encoded = encodeURIComponent(JSON.stringify(payload));
-  // We'll use a data URI that opens an inline HTML page
-  return encoded;
-}
+let spectatorBlobUrl = null;
+let qrInstance = null;
 
 function generateSpectatorHTML() {
   const meetName = document.getElementById('meet-name')?.value || 'Track Meet';
   const keys = Object.keys(results).sort();
   if (!keys.length) return null;
 
-  let tableRows = '';
+  // ── Build division cards using shared scoring function ──
+  const divMap = buildDivisionMap();
+  const genderOrder2 = { Boys:0, Girls:1, Mixed:2, Open:3 };
+  const distOrder2 = ['55M','60M','100M','200M','300M','400M','800M','1500M','1600M','Mile','3000M','3200M','5000M','10000M','Cross Country','Hurdles','Relay','Shot Put','Discus','Javelin','Hammer','Pole Vault','High Jump','Long Jump','Triple Jump'];
+
+  const sortedDivs = Object.values(divMap)
+    .filter(d => d.top3 && d.top3.length > 0)
+    .sort((a,b) => {
+      if (a.evIdx !== b.evIdx) return a.evIdx - b.evIdx;
+      const ga = genderOrder2[a.gender] ?? 9, gb = genderOrder2[b.gender] ?? 9;
+      if (ga !== gb) return ga - gb;
+      return a.gradeNum - b.gradeNum;
+    });
+
+  const medals = ['🥇','🥈','🥉'];
+  const genderColors = { Boys:'#1B2C52', Girls:'#8a2565', Mixed:'#4a3a8a', Open:'#4a5568' };
+  const genderBg    = { Boys:'rgba(27,44,82,0.08)', Girls:'rgba(138,37,101,0.08)', Mixed:'rgba(74,58,138,0.08)', Open:'rgba(74,85,105,0.08)' };
+
+  const divisionCards = sortedDivs.map(div => {
+    const gc = genderColors[div.gender] || '#4a5568';
+    const gb = genderBg[div.gender] || 'rgba(74,85,105,0.08)';
+    // Count distinct heats that contributed athletes to this division
+    const heatCount = [...new Set(div.top3.map(r => r.heatName))].length;
+
+    const athleteRows = div.top3.map((r,i) => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(27,44,82,0.06);">
+        <div style="font-size:24px;width:36px;text-align:center;flex-shrink:0;">${medals[i]}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:700;color:#111B30;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
+          <div style="font-size:12px;color:#5a6a88;margin-top:2px;">${r.team||'Unattached'} · ${r.heatName}</div>
+        </div>
+        <div style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:${i===0?'#7a5a10':i===1?'#4a5568':'#7a4010'};flex-shrink:0;">${r.time}</div>
+      </div>`).join('');
+
+    return `
+    <div style="background:#fff;border-radius:14px;overflow:hidden;border:1px solid rgba(27,44,82,0.1);box-shadow:0 2px 8px rgba(17,27,48,0.08);break-inside:avoid;">
+      <div style="background:#F4F6FA;padding:13px 16px;border-left:4px solid ${gc};border-bottom:1px solid rgba(27,44,82,0.1);">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+          <div style="font-size:18px;font-weight:800;color:#111B30;letter-spacing:-0.3px;">${div.event}</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:${gb};color:${gc};border:1px solid ${gc}55;">${div.gender}</span>
+            <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(201,168,76,0.12);color:#7a5a10;border:1px solid rgba(201,168,76,0.3);">${div.grade}</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#5a6a88;font-weight:600;margin-top:4px;">${heatCount} heat${heatCount!==1?'s':''} combined</div>
+      </div>
+      ${athleteRows}
+    </div>`;
+  }).join('');
+
+  // Full results table
+  let allRows = '';
   keys.forEach(heat => {
     results[heat].forEach(r => {
       const medal = r.place===1?'🥇':r.place===2?'🥈':r.place===3?'🥉':'';
-      tableRows += `<tr><td>${heat}</td><td>${medal} #${r.place}</td><td>${r.time}</td><td>${r.name}</td><td>${r.team||'—'}</td></tr>`;
+      allRows += `<tr style="border-bottom:1px solid rgba(27,44,82,0.06)">
+        <td style="padding:9px 12px;font-size:12px;color:#5a6a88;">${heat}</td>
+        <td style="padding:9px 12px;font-size:13px;">${medal} #${r.place}</td>
+        <td style="padding:9px 12px;font-weight:700;font-variant-numeric:tabular-nums;color:#111B30;white-space:nowrap;">${r.time}</td>
+        <td style="padding:9px 12px;font-weight:600;color:#111B30;">${r.name}</td>
+        <td style="padding:9px 12px;color:#5a6a88;font-size:12px;">${r.team||'—'}</td>
+      </tr>`;
     });
   });
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${meetName} — Results</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;background:#EDEEF2;color:#111B30;padding:16px}
-.header{background:#111B30;color:#E8EAF0;padding:20px 16px;border-radius:14px;margin-bottom:20px;border:1px solid rgba(201,168,76,0.35);}
-.header h1{font-size:22px;font-weight:700;letter-spacing:-0.3px}.header p{font-size:13px;color:rgba(201,168,76,0.7);margin-top:4px}
-.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(17,27,48,0.08);margin-bottom:16px;border:1px solid rgba(27,44,82,0.12)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:rgba(17,27,48,0.5);background:#FAFBFC;border-bottom:1px solid rgba(27,44,82,0.08)}
-tbody tr{border-bottom:1px solid rgba(27,44,82,0.06)}tbody tr:last-child{border-bottom:none}
-tbody td{padding:10px 14px;color:#243660}tbody td:nth-child(3){font-weight:700;font-variant-numeric:tabular-nums}
-.ts{text-align:center;font-size:11px;color:rgba(17,27,48,0.4);margin-top:20px}
-</style></head><body>
-<div class="header"><h1>🏁 ${meetName}</h1><p>Live Results — ${new Date().toLocaleString()}</p></div>
-<div class="card"><table><thead><tr><th>Event</th><th>Place</th><th>Time</th><th>Athlete</th><th>Team</th></tr></thead><tbody>${tableRows}</tbody></table></div>
-<div class="ts">Generated by Track Timing App</div>
-</body></html>`;
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${meetName} — Live Results</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:#EDEEF2;color:#111B30;padding:0 0 48px;}
+.header{background:#111B30;border-bottom:1px solid rgba(201,168,76,0.35);position:sticky;top:0;z-index:10;}
+.header-inner{max-width:760px;margin:0 auto;padding:16px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.header h1{font-size:19px;font-weight:700;color:#E8EAF0;letter-spacing:-0.3px;}
+.header-meta{font-size:11px;color:rgba(201,168,76,0.7);font-weight:600;}
+.wrap{max-width:760px;margin:0 auto;padding:20px 14px;}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#C9A84C;margin:28px 0 12px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(201,168,76,0.25);}
+.section-label:first-child{margin-top:0;}
+.div-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.results-table-wrap{background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(27,44,82,0.1);box-shadow:0 1px 4px rgba(17,27,48,0.07);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:rgba(17,27,48,0.4);background:#FAFBFC;border-bottom:1px solid rgba(27,44,82,0.08);}
+.footer{text-align:center;font-size:11px;color:rgba(17,27,48,0.35);margin-top:28px;}
+@media(max-width:500px){.div-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <h1>🏁 ${meetName}</h1>
+    <div class="header-meta">Updated ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="section-label">🏆 Division Winners</div>
+  <div class="div-grid">${divisionCards}</div>
+
+  <div class="section-label">📋 All Results</div>
+  <div class="results-table-wrap">
+    <table>
+      <thead><tr><th>Event / Heat</th><th>Place</th><th>Time</th><th>Athlete</th><th>Team</th></tr></thead>
+      <tbody>${allRows}</tbody>
+    </table>
+  </div>
+  <div class="footer">Track Timing App · ${new Date().toLocaleDateString()}</div>
+</div>
+</body>
+</html>`;
+}
+
+function getOrCreateSpectatorUrl() {
+  const html = generateSpectatorHTML();
+  if (!html) return null;
+  // Revoke previous blob to free memory
+  if (spectatorBlobUrl) URL.revokeObjectURL(spectatorBlobUrl);
+  spectatorBlobUrl = URL.createObjectURL(new Blob([html], {type:'text/html'}));
+  return spectatorBlobUrl;
 }
 
 function openSpectatorPage() {
-  const html = generateSpectatorHTML();
-  if (!html) { showToast('ℹ️','No results to share yet'); return; }
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
+  const url = getOrCreateSpectatorUrl();
+  if (!url) { showToast('ℹ️','No results to share yet'); return; }
   window.open(url, '_blank');
 }
 
-function copyResultsLink() {
-  const html = generateSpectatorHTML();
-  if (!html) { showToast('ℹ️','No results to share yet'); return; }
-  // Copy the HTML itself to clipboard
-  navigator.clipboard.writeText(html).then(() => {
-    showToast('✓','Results HTML copied — paste into any text file and open in browser');
-  }).catch(() => showToast('⚠️','Could not copy to clipboard'));
-}
-
 function downloadQR() {
-  const canvas = document.getElementById('qr-canvas');
-  if (!canvas) return;
-  const link = document.createElement('a');
-  link.download = 'meet-results-qr.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  showToast('✓','QR code downloaded');
-}
-
-// Minimal QR code generator (alphanumeric mode for URLs)
-// Using a simple approach: encode a short URL pointing to data
-function drawQRCode() {
-  const canvas = document.getElementById('qr-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const size = 140;
-
-  // Generate a simple pattern-based QR-like display
-  // Since we can't encode arbitrary data as a real QR without a library,
-  // we'll use the qrcode library from CDN
-  const meetName = document.getElementById('meet-name')?.value || 'Track Meet';
-  const urlText = `Results for: ${meetName}`;
-  document.getElementById('qr-url-text').textContent = 'Scan to view results page on any device';
-
-  // Load qrcode.js and draw
-  if (typeof QRCode !== 'undefined') {
-    renderQR(canvas, ctx, size);
+  const container = document.getElementById('qr-code-container');
+  if (!container) return;
+  // qrcodejs puts canvas inside a child div — search deeply
+  const canvas = container.querySelector('canvas');
+  if (canvas) {
+    const link = document.createElement('a');
+    link.download = 'meet-results-qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('✓','QR code downloaded');
   } else {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-    script.onload = () => renderQR(canvas, ctx, size);
-    script.onerror = () => drawFallbackQR(ctx, size);
-    document.head.appendChild(script);
+    showToast('ℹ️','Save a heat first to generate the QR code');
   }
 }
 
-function renderQR(canvas, ctx, size) {
-  // Use a temp div with QRCode library, then draw to our canvas
-  const tmp = document.createElement('div');
-  tmp.style.display = 'none';
-  document.body.appendChild(tmp);
+function refreshQRCode() {
+  const container = document.getElementById('qr-code-container');
+  const statusEl  = document.getElementById('qr-status-text');
+  if (!container) return;
+
+  const url = getOrCreateSpectatorUrl();
+
+  if (!url) {
+    container.innerHTML = '<div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:11px;text-align:center;line-height:1.6;padding:10px;">Save a heat to<br>generate QR code</div>';
+    if (statusEl) statusEl.textContent = 'Save a heat to generate the QR code';
+    return;
+  }
+
+  if (typeof QRCode === 'undefined') {
+    container.innerHTML = '<div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:11px;text-align:center;padding:10px;line-height:1.6;">Use "Open Results Page"<br>to share results</div>';
+    setTimeout(() => { if (typeof QRCode !== 'undefined') refreshQRCode(); }, 1200);
+    return;
+  }
+
   try {
-    const meetName = document.getElementById('meet-name')?.value || 'Track Meet';
-    const text = `Track Meet Results: ${meetName} — ${new Date().toLocaleDateString()} — Scan at finish line`;
-    new QRCode(tmp, { text, width: size, height: size, colorDark:'#111B30', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    // Render into a completely hidden offscreen div so qrcodejs can do its thing
+    const offscreen = document.createElement('div');
+    offscreen.style.cssText = 'position:fixed;left:-9999px;top:-9999px;visibility:hidden;';
+    document.body.appendChild(offscreen);
+
+    new QRCode(offscreen, {
+      text: url,
+      width: 150,
+      height: 150,
+      colorDark: '#111B30',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // After qrcodejs finishes (it's synchronous), grab the canvas
     setTimeout(() => {
-      const img = tmp.querySelector('img') || tmp.querySelector('canvas');
-      if (img) {
-        ctx.clearRect(0,0,size,size);
-        if (img.tagName === 'CANVAS') {
-          ctx.drawImage(img, 0, 0, size, size);
-        } else {
-          const i = new Image();
-          i.onload = () => ctx.drawImage(i, 0, 0, size, size);
-          i.src = img.src;
-        }
+      const canvas = offscreen.querySelector('canvas');
+      document.body.removeChild(offscreen);
+
+      // Wipe container and place only the canvas
+      while (container.firstChild) container.removeChild(container.firstChild);
+
+      if (canvas) {
+        canvas.style.display = 'block';
+        canvas.style.borderRadius = '4px';
+        container.appendChild(canvas);
+      } else {
+        container.innerHTML = '<div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:11px;text-align:center;padding:10px;line-height:1.5;">Use "Open Results Page"<br>to share</div>';
       }
-      document.body.removeChild(tmp);
-    }, 200);
+
+      const heatCount = Object.keys(results).length;
+      if (statusEl) statusEl.textContent = `Live · ${heatCount} heat${heatCount !== 1 ? 's' : ''} recorded — scan to view on any device`;
+    }, 100);
+
   } catch(e) {
-    document.body.removeChild(tmp);
-    drawFallbackQR(ctx, size);
+    container.innerHTML = '<div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;color:#8a9ab5;font-size:11px;text-align:center;padding:10px;">Use "Open Results Page"<br>to share</div>';
+    if (statusEl) statusEl.textContent = 'Use "Open Results Page" to share';
   }
 }
 
-function drawFallbackQR(ctx, size) {
-  // Draw a placeholder pattern if library fails
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0,0,size,size);
-  ctx.fillStyle = '#111B30';
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('QR unavailable', size/2, size/2-8);
-  ctx.fillText('Use "Open Page"', size/2, size/2+8);
-  ctx.fillText('to share results', size/2, size/2+24);
+// ════════════════════════════════════════════
+// EVENT FILTER
+// ════════════════════════════════════════════
+let activeEventFilter = 'all';
+
+function getEventFilterKey(h){const s=(h||'').toLowerCase();if(/\brelay\b/.test(s))return'Relay';if(/hurdle/.test(s))return'Hurdles';const m=s.match(/\b(\d+m)\b/);if(m)return m[1].toUpperCase();if(/mile/.test(s))return'Mile';if(/cross/.test(s))return'Cross Country';if(/shot/.test(s))return'Shot Put';if(/discus/.test(s))return'Discus';if(/javelin/.test(s))return'Javelin';if(/hammer/.test(s))return'Hammer';if(/pole/.test(s))return'Pole Vault';if(/high jump/.test(s))return'High Jump';if(/long jump/.test(s))return'Long Jump';if(/triple/.test(s))return'Triple Jump';return'Other';}
+
+function setEventFilter(key,btn){activeEventFilter=key;document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderHeatsGrid();}
+
+function buildFilterTabs(heats){
+  const bar=document.getElementById('event-filter-bar');if(!bar)return;
+  const counts={};heats.forEach(h=>{const k=getEventFilterKey(h);counts[k]=(counts[k]||0)+1;});
+  const order=['55M','60M','100M','200M','300M','400M','800M','1500M','1600M','Mile','3000M','3200M','5000M','10000M','Cross Country','Hurdles','Relay','Shot Put','Discus','Javelin','Hammer','Pole Vault','High Jump','Long Jump','Triple Jump','Other'];
+  const keys=Object.keys(counts).sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
+  const total=heats.length;
+  let html=`<button class="filter-tab ${activeEventFilter==='all'?'active':''}" onclick="setEventFilter('all',this)">All Events<span class="filter-tab-count">${total}</span></button>`;
+  keys.forEach(k=>{const active=activeEventFilter===k?'active':'';html+=`<button class="filter-tab ${active}" onclick="setEventFilter('${k.replace(/'/g,"\\'")}',this)">${k}<span class="filter-tab-count">${counts[k]}</span></button>`;});
+  bar.innerHTML=html;
 }
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
 let athletes=[], results={}, currentHeat=null, currentAthletes=[], recordedFinishes=[];
 let isRunning=false, startTime=0, pausedTime=0, timerInterval=null;
 let settings={autoAssign:true,sound:true};
@@ -920,7 +967,6 @@ function saveToStorage(){localStorage.setItem('tt_ath_v3',JSON.stringify(athlete
 function loadFromStorage(){try{const a=localStorage.getItem('tt_ath_v3');if(a)athletes=JSON.parse(a);const r=localStorage.getItem('tt_res_v3');if(r)results=JSON.parse(r);const s=localStorage.getItem('tt_set_v3');if(s)settings={...settings,...JSON.parse(s)};}catch(e){}}
 function saveMeetName(){localStorage.setItem('tt_meet',document.getElementById('meet-name').value.trim());}
 function loadMeetName(){const n=localStorage.getItem('tt_meet');if(n)document.getElementById('meet-name').value=n;}
-
 function formatTime(ms){if(!ms||ms<0)return'00:00.000';const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000),ms3=Math.floor(ms%1000);return`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms3).padStart(3,'0')}`;}
 function getCurrentElapsed(){if(!startTime)return 0;return isRunning?Date.now()-startTime:pausedTime;}
 function updateTimerDisplay(){const el=document.getElementById('timer-display');if(el)el.textContent=formatTime(getCurrentElapsed());}
@@ -929,22 +975,12 @@ function startTimer(){if(isRunning)return;startTime=startTime===0?Date.now():Dat
 function stopTimer(){if(!isRunning)return;clearInterval(timerInterval);isRunning=false;pausedTime=Date.now()-startTime;const btn=document.getElementById('start-btn');if(btn){btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> Resume`;btn.disabled=false;btn.style.opacity='1';}document.getElementById('timer-container')?.classList.remove('running');updateTimerDisplay();}
 function resetTimer(){clearInterval(timerInterval);isRunning=false;startTime=0;pausedTime=0;const el=document.getElementById('timer-display');if(el)el.textContent='00:00.000';const btn=document.getElementById('start-btn');if(btn){btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> Start`;btn.disabled=false;btn.style.opacity='1';}document.getElementById('timer-container')?.classList.remove('running');}
 
-function tapFinish(e){
-  const el=getCurrentElapsed();if(el===0){showToast('⚠️','Start the timer first');return;}
-  if(e){const btn=document.getElementById('tap-btn');const rect=btn.getBoundingClientRect();const rip=document.createElement('span');rip.className='tap-ripple';const size=Math.max(rect.width,rect.height);rip.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;btn.appendChild(rip);setTimeout(()=>rip.remove(),450);}
-  recordedFinishes.push({place:recordedFinishes.length+1,timeMs:el,athleteId:null});
-  renderFinishesList();updateAssignedCount();if(settings.sound)playTap();if(navigator.vibrate)navigator.vibrate(30);
-  document.getElementById('tap-count').textContent=recordedFinishes.length;
-  if(settings.autoAssign&&currentAthletes.length>0){const unassigned=currentAthletes.filter(a=>!recordedFinishes.some(f=>f.athleteId===a.id));if(unassigned.length===1){setTimeout(()=>{const last=recordedFinishes[recordedFinishes.length-1];if(last&&!last.athleteId){last.athleteId=unassigned[0].id;renderFinishesList();renderAthletesList();updateAssignedCount();}},200);}}
-  setTimeout(()=>{const l=document.getElementById('finishes-list');if(l)l.scrollTop=l.scrollHeight;},50);
-}
-
+function tapFinish(e){const el=getCurrentElapsed();if(el===0){showToast('⚠️','Start the timer first');return;}if(e){const btn=document.getElementById('tap-btn');const rect=btn.getBoundingClientRect();const rip=document.createElement('span');rip.className='tap-ripple';const size=Math.max(rect.width,rect.height);rip.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;btn.appendChild(rip);setTimeout(()=>rip.remove(),450);}recordedFinishes.push({place:recordedFinishes.length+1,timeMs:el,athleteId:null});renderFinishesList();updateAssignedCount();if(settings.sound)playTap();if(navigator.vibrate)navigator.vibrate(30);document.getElementById('tap-count').textContent=recordedFinishes.length;if(settings.autoAssign&&currentAthletes.length>0){const unassigned=currentAthletes.filter(a=>!recordedFinishes.some(f=>f.athleteId===a.id));if(unassigned.length===1){setTimeout(()=>{const last=recordedFinishes[recordedFinishes.length-1];if(last&&!last.athleteId){last.athleteId=unassigned[0].id;renderFinishesList();renderAthletesList();updateAssignedCount();}},200);}}setTimeout(()=>{const l=document.getElementById('finishes-list');if(l)l.scrollTop=l.scrollHeight;},50);}
 function playTap(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator(),g=ctx.createGain();osc.type='sine';osc.frequency.value=1047;g.gain.value=0.06;g.gain.linearRampToValueAtTime(0.001,ctx.currentTime+0.12);osc.connect(g);g.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+0.13);}catch(e){}}
 function clearFinishes(){if(!recordedFinishes.length)return;if(confirm('Clear all recorded times?')){recordedFinishes=[];renderFinishesList();updateAssignedCount();document.getElementById('tap-count').textContent='0';}}
 function assignToNextUnassigned(athleteId){const next=recordedFinishes.find(f=>!f.athleteId);if(!next){showToast('ℹ️','All places assigned.');return;}next.athleteId=athleteId;renderFinishesList();renderAthletesList();updateAssignedCount();}
 function assignAthlete(place,athleteId){if(!athleteId)return;const f=recordedFinishes.find(x=>x.place===place);if(f){f.athleteId=athleteId;renderFinishesList();renderAthletesList();updateAssignedCount();}}
 function unassignAthlete(place){const f=recordedFinishes.find(x=>x.place===place);if(f){f.athleteId=null;renderFinishesList();renderAthletesList();updateAssignedCount();}}
-
 function updateAssignedCount(){const el=document.getElementById('assigned-count'),np=document.getElementById('next-place');if(!el||!currentAthletes.length)return;const assigned=recordedFinishes.filter(f=>f.athleteId).length;el.textContent=`${assigned} of ${currentAthletes.length} assigned`;const nextIdx=recordedFinishes.findIndex(f=>!f.athleteId);if(np){if(nextIdx>=0)np.textContent=`Next: #${nextIdx+1}`;else if(recordedFinishes.length>0)np.textContent='All done ✓';else np.textContent='';}}
 
 function toggleGroup(key){collapsedGroups[key]=!collapsedGroups[key];const body=document.getElementById('grp-'+btoa(key).replace(/=/g,''));const chv=document.getElementById('chv-'+btoa(key).replace(/=/g,''));if(body){if(collapsedGroups[key]){body.classList.add('collapsed');chv?.classList.remove('open');}else{body.classList.remove('collapsed');chv?.classList.add('open');}}}
@@ -953,14 +989,11 @@ function toggleAthletesTable(){athletesTableCollapsed=!athletesTableCollapsed;co
 function renderAthletesList(){
   const container=document.getElementById('athletes-list');if(!container)return;
   if(!currentAthletes.length){container.innerHTML=`<div class="empty-state"><div class="empty-sub">No athletes loaded</div></div>`;return;}
-  const groups={};
-  currentAthletes.forEach(a=>{const g=a.gender||'Mixed',gr=a.grade?`Grade ${a.grade}`:'';const key=[g,gr].filter(Boolean).join(' · ');if(!groups[key])groups[key]=[];groups[key].push(a);});
-  const order=['Boys','Girls','Mixed'];
-  const keys=Object.keys(groups).sort((a,b)=>{const ga=a.split(' · ')[0],gb=b.split(' · ')[0];return(order.indexOf(ga)||99)-(order.indexOf(gb)||99);});
+  const groups={};currentAthletes.forEach(a=>{const g=a.gender||'Mixed',gr=a.grade?`Grade ${a.grade}`:'';const key=[g,gr].filter(Boolean).join(' · ');if(!groups[key])groups[key]=[];groups[key].push(a);});
+  const order=['Boys','Girls','Mixed'];const keys=Object.keys(groups).sort((a,b)=>{const ga=a.split(' · ')[0],gb=b.split(' · ')[0];return(order.indexOf(ga)||99)-(order.indexOf(gb)||99);});
   let html='';
   keys.forEach(key=>{
-    const safeId=btoa(key).replace(/=/g,'');const collapsed=!!collapsedGroups[key];const count=groups[key].length;
-    const assignedCount=groups[key].filter(a=>recordedFinishes.some(f=>f.athleteId===a.id)).length;
+    const safeId=btoa(key).replace(/=/g,'');const collapsed=!!collapsedGroups[key];const count=groups[key].length;const assignedCount=groups[key].filter(a=>recordedFinishes.some(f=>f.athleteId===a.id)).length;
     html+=`<div class="group-header" onclick="toggleGroup('${key.replace(/'/g,"\\'")}')"><div class="group-header-left"><span class="group-chevron ${collapsed?'':'open'}" id="chv-${safeId}">▶</span><span class="group-label">${key}</span><span class="group-count">${assignedCount}/${count}</span></div></div><div class="group-body ${collapsed?'collapsed':''}" id="grp-${safeId}" style="max-height:${collapsed?'0':count*65+'px'};">`;
     groups[key].forEach(ath=>{
       const assigned=recordedFinishes.some(f=>f.athleteId===ath.id);
@@ -975,64 +1008,177 @@ function renderAthletesList(){
 function renderFinishesList(){
   const c=document.getElementById('finishes-list');if(!c)return;
   if(!recordedFinishes.length){c.innerHTML=`<div class="empty-state"><div class="empty-icon">🏁</div><div class="empty-title">No finishes yet</div><div class="empty-sub">Tap the button as each athlete crosses</div></div>`;return;}
-  const leader=recordedFinishes[0].timeMs;
-  const available=currentAthletes.filter(a=>!recordedFinishes.some(f=>f.athleteId===a.id));
+  const leader=recordedFinishes[0].timeMs;const available=currentAthletes.filter(a=>!recordedFinishes.some(f=>f.athleteId===a.id));
   let html='';
   recordedFinishes.forEach((fin,i)=>{
-    const delta=fin.timeMs-leader,deltaStr=i===0?'Leader':`+${(delta/1000).toFixed(3)}s`;
-    const pc=['place-1','place-2','place-3'][i]||'place-n';
-    const ath=fin.athleteId?currentAthletes.find(a=>a.id===fin.athleteId):null;
-    let assignHtml='';
-    if(ath){assignHtml=`<div class="finish-name">${ath.name}</div>`;}
-    else{let opts=`<option value="">Select athlete…</option>`;available.forEach(a=>{opts+=`<option value="${a.id}">${a.name}</option>`;});assignHtml=`<select class="finish-select" onchange="assignAthlete(${fin.place},this.value)">${opts}</select>`;}
+    const delta=fin.timeMs-leader,deltaStr=i===0?'Leader':`+${(delta/1000).toFixed(3)}s`;const pc=['place-1','place-2','place-3'][i]||'place-n';const ath=fin.athleteId?currentAthletes.find(a=>a.id===fin.athleteId):null;
+    let assignHtml='';if(ath){assignHtml=`<div class="finish-name">${ath.name}</div>`;}else{let opts=`<option value="">Select athlete…</option>`;available.forEach(a=>{opts+=`<option value="${a.id}">${a.name}</option>`;});assignHtml=`<select class="finish-select" onchange="assignAthlete(${fin.place},this.value)">${opts}</select>`;}
     html+=`<div class="finish-row"><div class="place-num ${pc}">#${fin.place}</div><div><div class="finish-time">${formatTime(fin.timeMs)}</div><div class="finish-delta">${deltaStr}</div></div><div class="finish-assign" style="display:flex;align-items:center;gap:6px;">${assignHtml}${ath?`<button class="btn-unassign" onclick="unassignAthlete(${fin.place})" title="Unassign">✕</button>`:''}</div></div>`;
   });
   c.innerHTML=html;
 }
 
 function renderAthletesTable(){
-  const tbody=document.getElementById('athletes-table-body'),countEl=document.getElementById('athlete-count');
-  if(!tbody)return;if(countEl)countEl.textContent=athletes.length;
+  const tbody=document.getElementById('athletes-table-body'),countEl=document.getElementById('athlete-count');if(!tbody)return;if(countEl)countEl.textContent=athletes.length;
   if(!athletes.length){tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">No athletes yet</div><div class="empty-sub">Upload a CSV or add athletes manually</div></div></td></tr>`;return;}
-  tbody.innerHTML=athletes.map(a=>`<tr><td style="font-size:13px;font-weight:500;color:var(--text2);">${a.heat}</td><td style="text-align:center;"><span class="lane-num">${a.lane}</span></td><td style="font-weight:600;font-size:14px;">${a.name}</td><td style="font-size:13px;color:var(--text3);">${a.team}</td><td style="text-align:right;"><button class="btn-del" onclick="deleteAthlete('${a.id}')">Remove</button></td></tr>`).join('');
+  tbody.innerHTML=athletes.map(a=>`<tr><td style="font-size:13px;font-weight:500;color:#243660;">${a.heat}</td><td style="text-align:center;"><span class="lane-num">${a.lane}</span></td><td style="font-weight:600;font-size:14px;color:#111B30;">${a.name}</td><td style="font-size:13px;color:#5a6a88;">${a.team}</td><td style="text-align:right;"><button class="btn-del" onclick="deleteAthlete('${a.id}')">Remove</button></td></tr>`).join('');
+}
+
+function renderHeatsGrid(){
+  const sec=document.getElementById('heats-section');if(!sec)return;
+  const allHeats=[...new Set(athletes.map(a=>a.heat))];
+  if(!allHeats.length){sec.innerHTML=`<div class="card" style="padding:36px;text-align:center;border-style:dashed;"><div class="empty-icon">📋</div><div class="empty-sub">No heats yet — upload a CSV or add athletes manually</div></div>`;document.getElementById('event-filter-bar').innerHTML=`<button class="filter-tab active" onclick="setEventFilter('all',this)">All Events</button>`;return;}
+  buildFilterTabs(allHeats);
+  const filtered=activeEventFilter==='all'?allHeats:allHeats.filter(h=>getEventFilterKey(h)===activeEventFilter);
+  const sorted=sortHeats(filtered);
+  if(!sorted.length){sec.innerHTML=`<div class="card" style="padding:28px;text-align:center;"><div class="empty-sub">No heats match this filter</div></div>`;return;}
+  const groups=[];let lastEv=null;sorted.forEach(heat=>{const ev=getEventClass(heat);if(ev!==lastEv){groups.push({evClass:ev,label:EV_GROUP_NAMES[ev]||'Other',heats:[]});lastEv=ev;}groups[groups.length-1].heats.push(heat);});
+  sec.innerHTML=groups.map(group=>`
+    <div class="heats-group-label">${group.label}</div>
+    <div class="heats-grid">
+      ${group.heats.map(heat=>{
+        const count=athletes.filter(a=>a.heat===heat).length;
+        const done=!!results[heat];
+        const evClass=getEventClass(heat);
+        const hAthletes=athletes.filter(a=>a.heat===heat);
+
+        // For race_group heats: detect if there are multiple genders/grades present
+        const isRaceGroup = hAthletes.some(a=>a.raceGroup);
+        const uniqueGenders = [...new Set(hAthletes.map(a=>a.gender).filter(Boolean))];
+        const uniqueGrades  = [...new Set(hAthletes.map(a=>a.grade).filter(Boolean))];
+
+        // Gender bar class: mixed if multiple genders, otherwise normal
+        const gClass = isRaceGroup && uniqueGenders.length > 1
+          ? 'g-mixed'
+          : getGenderClass(heat);
+
+        const evLabel=getEventLabel(heat);
+        const grades=uniqueGrades;
+        const safeHeat=heat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+        // Tags for race_group: show each division present
+        let tagsHtml = '';
+        if (isRaceGroup && (uniqueGenders.length > 1 || uniqueGrades.length > 1)) {
+          // Show a summary of divisions in the race
+          const divSummary = [...new Set(hAthletes.map(a =>
+            [a.gender, a.grade ? `Gr.${a.grade}` : ''].filter(Boolean).join(' ')
+          ))].slice(0,3).map(d=>`<span class="htag htag-gr" style="font-size:9px;">${d}</span>`).join('');
+          tagsHtml = divSummary + `<span class="heat-count-text">${count} athlete${count!==1?'s':''}</span>`;
+        } else {
+          tagsHtml = `${genderTag(heat)}${gradeTag(heat,grades)}<span class="heat-count-text">${count} athlete${count!==1?'s':''}</span>`;
+        }
+
+        // Race group badge in header
+        const rgBadge = isRaceGroup ? `<div class="event-label" style="color:#4a3a8a;">Mixed Race</div>` : (evLabel ? `<div class="event-label">${evLabel}</div>` : '');
+        return `<div class="heat-card ${evClass} ${gClass}" onclick="loadHeat('${safeHeat}')"><div class="gender-bar"></div><div class="heat-card-body">${rgBadge}<div class="heat-name">${heat}</div><div class="heat-footer"><div class="heat-tags">${tagsHtml}</div>${done?`<span class="heat-chip chip-done">Done</span>`:`<span class="heat-chip chip-start">Start</span>`}</div></div></div>`;
+      }).join('')}
+    </div>`).join('');
 }
 
 function renderResults(){
-  const c=document.getElementById('results-content'),masterTbody=document.getElementById('all-results-body'),countEl=document.getElementById('total-results-count');
-  if(!c)return;const keys=Object.keys(results).sort();
-  if(!keys.length){c.innerHTML=`<div class="empty-state" style="padding:60px 20px;"><div class="empty-icon">🏆</div><div class="empty-title">No results yet</div><div class="empty-sub">Complete a heat to see results</div></div>`;if(masterTbody)masterTbody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px 20px;">No results recorded yet</td></tr>`;if(countEl)countEl.textContent='0';return;}
-  let allResults=[];keys.forEach(heat=>{results[heat].forEach(r=>{allResults.push({...r,heat});});});
-  allResults.sort((a,b)=>a.heat!==b.heat?a.heat.localeCompare(b.heat):a.place-b.place);
+  const c=document.getElementById('results-content'),masterTbody=document.getElementById('all-results-body'),countEl=document.getElementById('total-results-count');if(!c)return;
+  const keys=Object.keys(results).sort();
+  if(!keys.length){c.innerHTML=`<div class="empty-state" style="padding:60px 20px;"><div class="empty-icon">🏆</div><div class="empty-title">No results yet</div><div class="empty-sub">Complete a heat to see results</div></div>`;if(masterTbody)masterTbody.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px 20px;">No results recorded yet</td></tr>`;if(countEl)countEl.textContent='0';renderEventWinners();refreshQRCode();return;}
+  let allResults=[];keys.forEach(heat=>{results[heat].forEach(r=>{allResults.push({...r,heat});});});allResults.sort((a,b)=>a.heat!==b.heat?a.heat.localeCompare(b.heat):a.place-b.place);
   if(masterTbody)masterTbody.innerHTML=allResults.map(r=>`<tr><td style="font-size:12px;color:#243660;">${r.heat}</td><td style="text-align:center;"><span class="place-num ${r.place<=3?['place-1','place-2','place-3'][r.place-1]:'place-n'}" style="display:inline-flex;">#${r.place}</span></td><td style="font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;color:#111B30;">${r.time}</td><td style="font-weight:600;color:#111B30;">${r.name}</td><td style="color:#5a6a88;font-size:13px;">${r.team}</td><td style="text-align:center;color:#5a6a88;font-size:13px;">${r.lane||'—'}</td></tr>`).join('');
   if(countEl)countEl.textContent=allResults.length;
-  c.innerHTML=keys.map(heat=>`<div class="result-heat"><div class="result-heat-title">${heat}<span class="count-pill">${results[heat].length} finishers</span></div><div class="card"><div style="overflow-x:auto;"><table><thead><tr><th style="width:60px;">Place</th><th>Time</th><th>Athlete</th><th>Team</th><th style="width:70px;text-align:center;">Lane</th></tr></thead><tbody>${results[heat].map(r=>`<tr><td><span class="place-num ${r.place<=3?['place-1','place-2','place-3'][r.place-1]:'place-n'}" style="display:inline-flex;">#${r.place}</span></td><td style="font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;color:#111B30;">${r.time}</td><td style="font-weight:600;color:#111B30;">${r.name}</td><td style="color:#5a6a88;font-size:13px;">${r.team}</td><td style="text-align:center;color:#5a6a88;font-size:13px;">${r.lane||'—'}</td></tr>`).join('')}</tbody></table></div></div></div>`).join('');
-  // Refresh QR code whenever results change
-  setTimeout(drawQRCode, 100);
+  c.innerHTML=keys.map(heat=>{
+    const safeHeat=heat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div class="result-heat">
+      <div class="result-heat-title">
+        ${heat}
+        <span class="count-pill">${results[heat].length} finishers</span>
+        <button onclick="editHeat('${safeHeat}')" style="margin-left:auto;height:28px;padding:0 12px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.35);border-radius:20px;font-family:inherit;font-size:12px;font-weight:600;color:#7a5a10;cursor:pointer;display:flex;align-items:center;gap:5px;" onmouseover="this.style.background='rgba(201,168,76,0.2)'" onmouseout="this.style.background='rgba(201,168,76,0.1)'">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>
+          Edit
+        </button>
+      </div>
+      <div class="card"><div style="overflow-x:auto;"><table><thead><tr><th style="width:60px;">Place</th><th>Time</th><th>Athlete</th><th>Team</th><th style="width:70px;text-align:center;">Lane</th></tr></thead>
+      <tbody>${results[heat].map(r=>`<tr><td><span class="place-num ${r.place<=3?['place-1','place-2','place-3'][r.place-1]:'place-n'}" style="display:inline-flex;">#${r.place}</span></td><td style="font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;color:#111B30;">${r.time}</td><td style="font-weight:600;color:#111B30;">${r.name}</td><td style="color:#5a6a88;font-size:13px;">${r.team}</td><td style="text-align:center;color:#5a6a88;font-size:13px;">${r.lane||'—'}</td></tr>`).join('')}</tbody>
+      </table></div></div>
+    </div>`;
+  }).join('');
+  renderEventWinners();
+  refreshQRCode();
 }
 
-function loadHeat(heat){
-  currentHeat=heat;currentAthletes=athletes.filter(a=>a.heat===heat).sort((a,b)=>a.lane-b.lane);
-  recordedFinishes=[];collapsedGroups={};
-  const sec=document.getElementById('timer-section');sec.classList.remove('hidden');
-  document.getElementById('heat-title').textContent=heat;document.getElementById('tap-count').textContent='0';
-  renderAthletesList();renderFinishesList();updateAssignedCount();resetTimer();
-  setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),80);
-}
+function loadHeat(heat){currentHeat=heat;currentAthletes=athletes.filter(a=>a.heat===heat).sort((a,b)=>a.lane-b.lane);recordedFinishes=[];collapsedGroups={};const sec=document.getElementById('timer-section');sec.classList.remove('hidden');document.getElementById('heat-title').textContent=heat;document.getElementById('tap-count').textContent='0';renderAthletesList();renderFinishesList();updateAssignedCount();resetTimer();setTimeout(()=>sec.scrollIntoView({behavior:'smooth',block:'start'}),80);}
 
+function editHeat(heat) {
+  if (!results[heat]) { showToast('⚠️','No saved results for this heat'); return; }
+  if (!confirm(`Re-open "${heat}" for editing?\n\nAll saved finish times will be restored. Hit "Save & Next Heat" when done to overwrite.`)) return;
+
+  currentHeat = heat;
+  currentAthletes = athletes.filter(a => a.heat === heat).sort((a,b) => a.lane - b.lane);
+  collapsedGroups = {};
+
+  // Restore finish records from saved results
+  recordedFinishes = results[heat].map(r => ({
+    place:     r.place,
+    timeMs:    r.timeMs,
+    athleteId: r.athleteId || null,
+  }));
+
+  // Stop any running timer first
+  clearInterval(timerInterval);
+  isRunning = false;
+
+  // Set timer to the last recorded finish time
+  const lastTime = recordedFinishes.length ? recordedFinishes[recordedFinishes.length - 1].timeMs : 0;
+  startTime = 0;
+  pausedTime = lastTime;
+
+  // Update display to show last time
+  const el = document.getElementById('timer-display');
+  if (el) el.textContent = formatTime(lastTime);
+
+  // Reset start button to Resume state since we have a paused time
+  const btn = document.getElementById('start-btn');
+  if (btn) {
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg> Resume`;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+  document.getElementById('timer-container')?.classList.remove('running');
+
+  const sec = document.getElementById('timer-section');
+  sec.classList.remove('hidden');
+  document.getElementById('heat-title').textContent = heat + ' ✏️';
+  document.getElementById('tap-count').textContent = recordedFinishes.length;
+
+  renderAthletesList();
+  renderFinishesList();
+  updateAssignedCount();
+
+  setTimeout(() => sec.scrollIntoView({behavior:'smooth', block:'start'}), 80);
+  showToast('✏️', `${recordedFinishes.length} finish${recordedFinishes.length!==1?'es':''} loaded — edit and save`);
+}
 function closeTimer(){document.getElementById('timer-section').classList.add('hidden');currentHeat=null;currentAthletes=[];recordedFinishes=[];resetTimer();}
 
 function saveAndClearHeat(){
   if(!currentHeat||!recordedFinishes.length){showToast('⚠️','Record at least one finish time first.');return;}
-  const unassigned=recordedFinishes.filter(f=>!f.athleteId).length;
-  if(unassigned>0&&!confirm(`${unassigned} finish(es) unassigned. Save anyway?`))return;
-  results[currentHeat]=recordedFinishes.map(f=>{const a=f.athleteId?currentAthletes.find(x=>x.id===f.athleteId):null;return{place:f.place,timeMs:f.timeMs,time:formatTime(f.timeMs),athleteId:f.athleteId,name:a?a.name:'Unassigned',team:a?a.team:'',lane:a?a.lane:''};});
-  saveToStorage();
-  if(results[currentHeat].every(r=>r.name!=='Unassigned')&&results[currentHeat].length>=3)launchConfetti();
+  const unassigned=recordedFinishes.filter(f=>!f.athleteId).length;if(unassigned>0&&!confirm(`${unassigned} finish(es) unassigned. Save anyway?`))return;
+  results[currentHeat]=recordedFinishes.map(f=>{
+    const a=f.athleteId?currentAthletes.find(x=>x.id===f.athleteId):null;
+    return{
+      place:f.place, timeMs:f.timeMs, time:formatTime(f.timeMs),
+      athleteId:f.athleteId,
+      name:  a ? a.name  : 'Unassigned',
+      team:  a ? a.team  : '',
+      lane:  a ? a.lane  : '',
+      // Division metadata — used for per-division scoring on the spectator page
+      // For race_group heats each athlete has their own event/gender/grade
+      event:  a ? (a.event  || currentHeat) : currentHeat,
+      gender: a ? (a.gender || '')          : '',
+      grade:  a ? (a.grade  || '')          : '',
+    };
+  });
+  saveToStorage();if(results[currentHeat].every(r=>r.name!=='Unassigned')&&results[currentHeat].length>=3)launchConfetti();
   document.getElementById('timer-section').classList.add('hidden');currentHeat=null;recordedFinishes=[];
   renderHeatsGrid();renderResults();showToast('✓','Results saved');
 }
 
-function launchConfetti(){const colors=['#34c759','#007aff','#ff9500','#ff2d55','#af52de'];for(let i=0;i<40;i++){setTimeout(()=>{const el=document.createElement('div');el.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-10px;width:8px;height:8px;border-radius:${Math.random()>.5?'50%':'2px'};background:${colors[i%colors.length]};z-index:9999;pointer-events:none;transition:transform 1.4s ease,opacity 1.2s ease`;document.body.appendChild(el);setTimeout(()=>{el.style.transform=`translateY(${innerHeight+20}px) rotate(${Math.random()*360}deg)`;el.style.opacity='0';},30);setTimeout(()=>el.remove(),1500);},i*18);}}
+function launchConfetti(){const colors=['#C9A84C','#1B2C52','#E8EAF0','#2E9E58','#8a2565'];for(let i=0;i<50;i++){setTimeout(()=>{const el=document.createElement('div');el.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-10px;width:8px;height:8px;border-radius:${Math.random()>.5?'50%':'2px'};background:${colors[i%colors.length]};z-index:9999;pointer-events:none;transition:transform 1.4s ease,opacity 1.2s ease`;document.body.appendChild(el);setTimeout(()=>{el.style.transform=`translateY(${innerHeight+20}px) rotate(${Math.random()*360}deg)`;el.style.opacity='0';},30);setTimeout(()=>el.remove(),1500);},i*16);}}
 
 function addAthlete(){const heat=document.getElementById('add-heat').value.trim()||'Heat 1';const lane=parseInt(document.getElementById('add-lane').value)||99;const name=document.getElementById('add-name').value.trim();const team=document.getElementById('add-team').value.trim()||'Unattached';if(!name){document.getElementById('add-name').focus();return;}athletes.push({id:'a-'+Date.now().toString(36),heat,lane,name,team});saveToStorage();hideAddModal();renderAthletesTable();renderHeatsGrid();showToast('✓',`Added ${name}`);}
 function showAddModal(){document.getElementById('add-modal').classList.add('open');setTimeout(()=>document.getElementById('add-name').focus(),100);}
@@ -1043,76 +1189,67 @@ function handleCSVUpload(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=ev=>{
-    const parsed=parseCSV(ev.target.result);
-    if(!parsed.length){showToast('⚠️','No valid rows found in CSV');return;}
-    athletes=athletes.concat(parsed);saveToStorage();renderAthletesTable();renderHeatsGrid();
-    showToast('✓',`Imported ${parsed.length} athletes`);
+    const parsed=parseCSV(ev.target.result);if(!parsed.length){showToast('⚠️','No valid rows found in CSV');return;}
+    athletes=athletes.concat(parsed);saveToStorage();renderAthletesTable();renderHeatsGrid();showToast('✓',`Imported ${parsed.length} athletes`);
   };
   reader.readAsText(file);e.target.value='';
 }
 
 function parseCSV(text){
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
+  const lines=text.trim().split(/\r?\n/);if(lines.length<2)return[];
+  function parseLine(line){const result=[];let current='',inQuotes=false;for(let i=0;i<line.length;i++){const char=line[i];if(char==='"'){inQuotes=!inQuotes;}else if(char===','&&!inQuotes){result.push(current.trim());current='';}else{current+=char;}}result.push(current.trim());return result;}
+  const headers=parseLine(lines[0]).map(h=>h.toLowerCase().trim());
+  return lines.slice(1).filter(l=>l.trim()).map((line,i)=>{
+    const vals=parseLine(line),row={};headers.forEach((h,idx)=>row[h]=vals[idx]||'');
 
-  // Proper CSV line parser that handles quoted fields with commas
-  function parseLine(line) {
-    const result = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    result.push(current.trim());
-    return result;
-  }
+    const event     = row.event||row['event name']||row.race||'';
+    const heatNum   = row.heat||row['heat number']||row['heat #']||'';
+    const grade     = row.grade||row['grade level']||row.gr||'';
+    const gender    = row.gender||row.sex||'';
+    const raceGroup = row.race_group||row.racegroup||row['race group']||row.group||'';
+    const lane      = parseInt(row.lane||row.ln||'99')||99;
+    const name      = row.name||row.athlete||row['athlete name']||'';
+    if(!name) return null;
+    const school = row.school||row.team||row.club||'Unattached';
 
-  const headers = parseLine(lines[0]).map(h => h.toLowerCase().trim());
+    // Normalise gender and grade for display
+    const genderDisplay = gender ? gender.charAt(0).toUpperCase()+gender.slice(1).toLowerCase() : '';
+    const gradeDisplay  = grade  ? `Grade ${grade}` : '';
 
-  return lines.slice(1).filter(l => l.trim()).map((line, i) => {
-    const vals = parseLine(line);
-    const row = {};
-    headers.forEach((h, idx) => row[h] = vals[idx] || '');
-
-    const event = row.event || row['event name'] || row.race || '';
-    const heatNum = row.heat || row['heat number'] || row['heat #'] || '';
-    const grade = row.grade || row['grade level'] || row.gr || '';
-    const gender = row.gender || row.sex || '';
-    const raceGroup = row.race_group || row.racegroup || row['race group'] || row.group || '';
-    const lane = parseInt(row.lane || row.ln || '99') || 99;
-    const name = row.name || row.athlete || row['athlete name'] || '';
-    if (!name) return null;
-    const school = row.school || row.team || row.club || 'Unattached';
-
-    // FINAL WORKING LOGIC
-    let label = event || 'Event';
+    let heatLabel;
 
     if (raceGroup) {
-      // Combined/mixed heats (800M, 1600M etc.)
-      label = raceGroup;
+      // ── MIXED RACE GROUP ──
+      // race_group is present → all athletes with the same race_group value
+      // run together as one physical heat. The heat card shows the race_group name
+      // (e.g. "800M Mixed 1"). Each athlete keeps their own event/gender/grade
+      // so they are scored in their own division on the results page.
+      heatLabel = raceGroup;
     } else {
-      // Normal events - always use old logic (event + Heat + grade + gender)
-      if (event && heatNum) {
-        label = `${event} — Heat ${heatNum}`;
-      } else if (heatNum) {
-        label = `Heat ${heatNum}`;
-      }
+      // ── NORMAL HEAT ──
+      // Build label: "800M — Heat 2 — Boys Grade 8"
+      heatLabel = event || 'Event';
+      if (event && heatNum) heatLabel = `${event} — Heat ${heatNum}`;
+      else if (heatNum)     heatLabel = `Heat ${heatNum}`;
 
       const parts = [];
-      if (gender) parts.push(gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase());
-      if (grade) parts.push(`Grade ${grade}`);
-      if (parts.length) label += ` — ${parts.join(' ')}`;
+      if (genderDisplay) parts.push(genderDisplay);
+      if (gradeDisplay)  parts.push(gradeDisplay);
+      if (parts.length)  heatLabel += ` — ${parts.join(' ')}`;
     }
 
-    return {id: `csv-${Date.now().toString(36)}-${i}`, heat: label, lane, name, team: school, grade, gender, raceGroup};
+    return {
+      id:        `csv-${Date.now().toString(36)}-${i}`,
+      heat:      heatLabel,   // what heat card they appear on
+      lane,
+      name,
+      team:      school,
+      // Division metadata — always preserved for scoring
+      event:     event || heatLabel,   // base event name (e.g. "800M")
+      grade,                           // raw grade number string (e.g. "8")
+      gender:    genderDisplay,        // normalised (e.g. "Boys")
+      raceGroup: raceGroup || null,    // non-null when it's a mixed race
+    };
   }).filter(Boolean);
 }
 
@@ -1124,7 +1261,6 @@ function loadProject(e){const file=e.target.files[0];if(!file)return;const reade
 function showSettings(){document.getElementById('settings-modal').classList.add('open');document.getElementById('auto-assign-toggle').checked=settings.autoAssign;document.getElementById('sound-toggle').checked=settings.sound;}
 function hideSettings(){document.getElementById('settings-modal').classList.remove('open');}
 function updateSettings(){settings.autoAssign=document.getElementById('auto-assign-toggle').checked;settings.sound=document.getElementById('sound-toggle').checked;saveToStorage();}
-
 function showWalkOnModal(){if(!currentHeat)return;document.getElementById('walkon-heat-label').textContent=`Adding to: ${currentHeat}`;['wo-name','wo-lane','wo-team','wo-grade'].forEach(id=>document.getElementById(id).value='');document.getElementById('walkon-modal').classList.add('open');setTimeout(()=>document.getElementById('wo-name').focus(),120);}
 function hideWalkOnModal(){document.getElementById('walkon-modal').classList.remove('open');}
 function addWalkOn(){const name=document.getElementById('wo-name').value.trim();if(!name){document.getElementById('wo-name').focus();return;}const lane=parseInt(document.getElementById('wo-lane').value)||99;const team=document.getElementById('wo-team').value.trim()||'Unattached';const grade=document.getElementById('wo-grade').value.trim()||'';const gender=currentHeat.includes('Boys')?'Boys':currentHeat.includes('Girls')?'Girls':'';const newAth={id:'wo-'+Date.now().toString(36),heat:currentHeat,lane,name,team,grade,gender,walkOn:true};athletes.push(newAth);currentAthletes.push(newAth);currentAthletes.sort((a,b)=>a.lane-b.lane);saveToStorage();renderAthletesTable();renderHeatsGrid();renderAthletesList();updateAssignedCount();hideWalkOnModal();showToast('🏃',`${name} added as walk-on`);}
@@ -1133,7 +1269,7 @@ function showToast(icon,msg){const t=document.createElement('div');t.className='
 
 document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;const vis=!document.getElementById('timer-section').classList.contains('hidden');if(e.key.toLowerCase()==='t'&&vis){e.preventDefault();tapFinish(null);}if(e.key.toLowerCase()==='s'&&vis){e.preventDefault();isRunning?stopTimer():startTimer();}if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));}});
 
-function loginUser(){const pass=document.getElementById('login-pass').value.trim();const correctPass=localStorage.getItem('tt_passcode')||'track2026';if(pass===correctPass){localStorage.setItem('tt_logged_in','true');document.getElementById('login-screen').style.display='none';showToast('✓','Welcome back!');}else{const input=document.getElementById('login-pass');input.style.borderColor='#ff3b30';input.value='';setTimeout(()=>input.style.borderColor='#d1d1d6',800);showToast('⚠️','Incorrect passcode');}}
+function loginUser(){const pass=document.getElementById('login-pass').value.trim();const correctPass=localStorage.getItem('tt_passcode')||'track2026';if(pass===correctPass){localStorage.setItem('tt_logged_in','true');document.getElementById('login-screen').style.display='none';showToast('✓','Welcome back!');}else{const input=document.getElementById('login-pass');input.style.borderColor='#c0392b';input.value='';setTimeout(()=>input.style.borderColor='rgba(201,168,76,0.3)',800);showToast('⚠️','Incorrect passcode');}}
 function setupPasscode(){const newPass=prompt('Set your passcode (min 4 characters):');if(newPass&&newPass.length>=4){localStorage.setItem('tt_passcode',newPass);localStorage.setItem('tt_logged_in','true');document.getElementById('login-screen').style.display='none';showToast('✓','Passcode set!');}else{alert('Passcode must be at least 4 characters.');}}
 
 window.onload=()=>{
